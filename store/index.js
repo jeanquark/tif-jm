@@ -7,7 +7,9 @@ export const strict = false
 export const state = () => ({
     loading: false,
     loadingPage: false,
-    error: null
+    error: null,
+    loginModal: false,
+    registerModal: false
 })
 
 export const mutations = {
@@ -24,6 +26,18 @@ export const mutations = {
     },
     clearError(state) {
         state.error = null
+    },
+    openLoginModal (state) {
+        state.loginModal = true
+    },
+    closeLoginModal (state) {
+        state.loginModal = false
+    },
+    openRegisterModal (state) {
+        state.registerModal = true
+    },
+    closeRegisterModal (state) {
+        state.registerModal = false
     }
 }
 
@@ -109,5 +123,11 @@ export const getters = {
     },
     error(state) {
         return state.error
+    },
+    loginModal (state) {
+        return state.loginModal
+    },
+    registerModal (state) {
+        return state.registerModal
     }
 }
