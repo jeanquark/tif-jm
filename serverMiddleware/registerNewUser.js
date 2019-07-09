@@ -1,13 +1,8 @@
-const connect = require('connect'),
-      express = require('express'),
-      http = require('http'),
-      url = require('url'),
+const express = require('express'),
       bodyParser = require('body-parser'),
       moment = require('moment'),
-    //   admin = require('../services/firebase-admin-init.js');
       admin = require('firebase-admin');
 
-// const app = connect();
 const app = express();
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -18,7 +13,7 @@ function buildUserObject (payload) {
     user.id = payload.id,
     user.email = payload.email,
     user.pseudo = payload.pseudo ? payload.pseudo : '',
-	user.birthyear = payload.birthyear ? payload.birthyear : '',
+	user.birthdate = payload.birthdate ? payload.birthdate : '',
     user.country = {
         name: payload.country.name ? payload.country.name : '',
         slug: payload.country.slug ? payload.country.slug : ''

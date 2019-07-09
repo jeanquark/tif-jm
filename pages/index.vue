@@ -63,13 +63,15 @@
 							    class="part-2"
 							    v-animate="{value: 'bounceInRight'}"
 							>How it works</h2>
+							
 							<v-layout>
 								<v-flex
 								    xs12
 								    sm6
 								    md4
 								>
-									<v-card class="ma-3">
+									<p>loadedUser: {{ loadedUser }}</p>
+									<!-- <v-card class="ma-3">
 										<v-card-title>
 										</v-card-title>
 
@@ -79,7 +81,7 @@
 
 										<v-card-actions>
 										</v-card-actions>
-									</v-card>
+									</v-card> -->
 								</v-flex>
 							</v-layout>
 						</div>
@@ -127,6 +129,7 @@
 </template>
 
 <script>
+	import Noty from 'noty'
 	import Login from '~/components/Login'
 	import Register from '~/components/Register'
 	import ForgotPassword from '~/components/ForgotPassword'
@@ -135,8 +138,14 @@
 			validator: 'new' // Provide new validator scope.
 		},
 		components: { Login, Register, ForgotPassword },
-		// name: 'Fullpage',
-		// layout: 'short',
+		mounted () {
+			new Noty({
+				type: 'success',
+				text: 'Welcome!',
+				timeout: 5000,
+				theme: 'metroui'
+			}).show()
+		},
 		data() {
 			return {
 				// index: 0,
@@ -147,18 +156,21 @@
 					loop: false,
 					duration: 300,
 					beforeChange: function(ele, current, next) {
-						console.log('before', current, next)
+						// console.log('before', current, next)
 						this.index = next
 					},
 					afterChange: function(ele, current) {
 						this.index = current
-						console.log('after', current)
+						// console.log('after', current)
 					}
 				},
 				forgotPasswordModal: false
 			}
 		},
 		computed: {
+			loadedUser () {
+				return this.$store.getters['users/loadedUser']
+			},
 			loginModal () {
 				return this.$store.getters['loginModal']
             },
@@ -223,14 +235,14 @@
 		display: block;
 		max-width: 1000px;
 		text-align: center;
-		font-size: 26px;
-		color: #eee;
+		font-size: 14px;
+		color: #000;
 	}
 	.page-1 {
 		background: var(--v-primary-base);
 	}
 	.page-2 {
-		padding-top: 100px;
+		padding-top: 50px;
 		/* background: var(--v-primary-base); */
 		background: #fff;
 	}
@@ -257,22 +269,23 @@
 	.tifUpperHalf {
 		position: absolute;
 		bottom: 0;
-		margin-bottom: -21px;
+		margin-bottom: -18px;
 		padding: 0px;
 		width: 100%;
 		font-family: 'Acme';
-		font-size: 5em;
+		font-size: 8em;
 		font-weight: 700;
+		color: #000;
 		letter-spacing: 3px;
 	}
 	.tifLowerHalf {
 		position: absolute;
 		top: 0;
-		margin-top: -22px;
+		margin-top: -19px;
 		padding: 0px;
 		width: 100%;
 		font-family: 'Acme';
-		font-size: 5em;
+		font-size: 8em;
 		font-weight: 700;
 		letter-spacing: 3px;
 		color: #000;

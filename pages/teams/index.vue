@@ -693,7 +693,7 @@
         display: flex;
         flex-wrap: nowrap;
         overflow-x: auto;
-        justify-content: start;
+        justify-content: flex-start;
         }
 
         #app {

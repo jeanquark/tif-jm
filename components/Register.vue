@@ -20,12 +20,12 @@
 				<v-card-text>
 					<v-text-field
 					    label="Email"
-					    v-model="form.email"
 					    name="email"
 					    v-validate="'required|email'"
 					    :error="errors.has('email')"
 					    :error-messages="errors.collect('email')"
 					    data-vv-as="Email"
+					    v-model="form.email"
 					></v-text-field>
 					<span class="caption grey--text text--darken-1">
 						This is the email you will use to login to your ThisIsFan account
@@ -46,37 +46,37 @@
 					<v-text-field
 					    label="Password"
 					    type="password"
-					    v-model="form.password"
 					    name="password"
 					    ref="password"
 					    v-validate="'required|min:6'"
 					    :error="errors.has('password')"
 					    :error-messages="errors.collect('password')"
 					    data-vv-as="Password"
+					    v-model="form.password"
 					></v-text-field>
 
 					<v-text-field
 					    label="Repeat Password"
 					    type="password"
-					    v-model="form.password_confirm"
 					    name="password_confirm"
 					    v-validate="'required|confirmed:password'"
 					    :error="errors.has('password_confirm')"
 					    :error-messages="errors.collect('password_confirm')"
 					    data-vv-as="Repeat Password"
+					    v-model="form.password_confirm"
 					></v-text-field>
 
 					<v-text-field
 					    label="Pseudo"
-					    v-model="form.pseudo"
 					    name="pseudo"
 					    v-validate="'required|max:15'"
 					    :error="errors.has('pseudo')"
 					    :error-messages="errors.collect('pseudo')"
 					    data-vv-as="Pseudo"
+					    v-model="form.pseudo"
 					></v-text-field>
 
-					<v-autocomplete
+					<!-- <v-autocomplete
 					    label="Select your birth year"
 					    name="Birthyear"
 					    :items="birthyears"
@@ -85,10 +85,37 @@
 					    item-text="value"
 					    :return-object="true"
 					    v-model="form.birthyear"
-					></v-autocomplete>
+					></v-autocomplete> -->
+
+					<v-menu
+					    ref="menu"
+					    v-model="birthdayMenu"
+					    :close-on-content-click="false"
+					    :nudge-right="40"
+					    lazy
+					    transition="scale-transition"
+					    offset-y
+					    full-width
+					    min-width="290px"
+					>
+						<template v-slot:activator="{ on }">
+							<v-text-field
+							    v-model="form.birthday"
+							    label="Birthday date"
+							    readonly
+							    v-on="on"
+							></v-text-field>
+						</template>
+						<v-date-picker
+						    ref="picker"
+						    v-model="form.birthday"
+						    :max="new Date().toISOString().substr(0, 10)"
+						    min="1920-01-01"
+						    @change="save"
+						></v-date-picker>
+					</v-menu>
 
 					<v-autocomplete
-					    v-model="form.country"
 					    name="country"
 					    :items="loadedCountries"
 					    chips
@@ -100,6 +127,7 @@
 					    :error="errors.has('country')"
 					    :error-messages="errors.collect('country')"
 					    data-vv-as="Country"
+					    v-model="form.country"
 					>
 						<template
 						    slot="selection"
@@ -110,7 +138,6 @@
 							    class="chip"
 							>
 								<v-avatar>
-									<!-- <img :src="data.item.avatar"> -->
 									<img :src="`/images/countries/${data.item.flag}`">
 								</v-avatar>
 								{{ data.item.name }}
@@ -125,12 +152,10 @@
 							</template>
 							<template v-else>
 								<v-list-tile-avatar>
-									<!-- <img :src="data.item.avatar"> -->
 									<img :src="`/images/countries/${data.item.flag}`">
 								</v-list-tile-avatar>
 								<v-list-tile-content>
 									<v-list-tile-title v-html="data.item.name"></v-list-tile-title>
-									<!-- <v-list-tile-sub-title v-html="data.item.group"></v-list-tile-sub-title> -->
 								</v-list-tile-content>
 							</template>
 						</template>
@@ -156,47 +181,62 @@
 		<v-divider></v-divider>
 
 		<v-card-actions>
-			<v-layout justify-center>
-				<v-btn
-				    flat
-				    @click="step--"
-				    v-if="step !== 1"
+			<v-layout
+			    row
+			    wrap
+			    justify-center
+			>
+				<v-flex
+				    xs12
+				    text-xs-center
 				>
-					Back
-				</v-btn>
-				<!-- <v-spacer></v-spacer> -->
-				<v-btn
-				    flat
-				    @click="switchToLogin"
-				    v-if="step === 1"
-				>
-					Switch to login
-				</v-btn>
+					<v-btn
+					    flat
+					    @click="step--"
+					    v-if="step !== 1"
+					>
+						Back
+					</v-btn>
+					<!-- <v-spacer></v-spacer> -->
+					<v-btn
+					    flat
+					    @click="switchToLogin"
+					    v-if="step === 1"
+					>
+						Switch to login
+					</v-btn>
 
-				<v-btn
-				    :disabled="errors.items.length > 0 || !form.password_confirm > 0 || !form.country > 0"
-				    color="success"
-				    v-if="step === 2"
-				    @click.prevent="signUserUp"
-				    :loading="loading"
-				>
-					Register
-				</v-btn>
+					<v-btn
+					    :disabled="errors.items.length > 0 || !form.password_confirm > 0 || !form.country > 0"
+					    :loading="loading"
+					    color="success"
+					    v-if="step === 2"
+					    @click.stop="signUserUp"
+					>
+						Register
+					</v-btn>
 
-				<v-btn
-				    color="success"
-				    @click="step++"
-				    v-if="step === 1"
+					<v-btn
+					    color="success"
+					    @click="step++"
+					    v-if="step === 1"
+					>
+						Next
+					</v-btn>
+				</v-flex>
+				<v-flex
+				    xs12
+				    text-xs-center
+				    mt-3
 				>
-					Next
-				</v-btn>
-                <v-btn
-                    flat
-				    color="primary"
-				    @click.stop="closeRegisterModal"
-				>
-					Cancel
-				</v-btn>
+					<v-btn
+					    flat
+					    color="primary"
+					    @click.stop="closeRegisterModal"
+					>
+						Cancel
+					</v-btn>
+				</v-flex>
 			</v-layout>
 		</v-card-actions>
 	</v-card>
@@ -213,25 +253,20 @@
 			// this.$store.dispatch("birthyear/loadedBirthyear")
 		},
 		async mounted() {
-			const snapshot = await firebase
-				.database()
-				.ref('/birthyears/')
-				.once('value')
-			for (let year in snapshot.val()) {
-				this.birthyears.push(year)
-			}
 		},
 		data: () => ({
 			step: 1,
 			form: {
 				email: '',
-				password: '',
-				password_confirm: '',
-				pseudo: '',
-				birthyear: '',
+				password: 'secret',
+				password_confirm: 'secret',
+				pseudo: 'jeanquark',
+				birthday: '1984-02-28',
 				country: null
 			},
-			birthyears: []
+			// birthyears: [],
+			// date: null,
+			birthdayMenu: false
 		}),
 		computed: {
 			loading() {
@@ -253,45 +288,55 @@
 			loadedCountries() {
 				return this.$store.getters['countries/loadedCountries']
 			}
-			// loadedBirthyear() {
-			//     return this.$store.getters["birthyear/loadedBirthyear"]
-			// }
 		},
 		methods: {
+			save(date) {
+				this.$refs.menu.save(date)
+			},
 			async signUserUp() {
 				try {
 					console.log('signUserUp')
-					console.log(this.form)
+                    console.log('this.form: ', this.form)
+                    this.$store.commit('setLoading', true, { root: true })
+                    // setTimeout(() => {
+					// 	}, 2000)
 
 					await this.$store.dispatch(
 						'firebase-auth/signUserUp',
 						this.form
 					)
-					if (this.$i18n.locale != 'en') {
-						this.$router.replace(
-							'/' + this.$i18n.locale + '/gamemode_gm'
-						)
-					} else {
-						this.$router.replace('/gamemode_gm')
-					}
+					new Noty({
+						type: 'success',
+						text: 'Registration went successfully!',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+					this.$router.replace('/gamemode')
+                    this.$store.commit('setLoading', false, { root: true })
+                    this.$store.commit('closeRegisterModal')
 				} catch (error) {
-					console.log('error from signUserUp: ', error)
+					console.log('error: ', error)
+                    this.$store.commit('setLoading', false, { root: true })
 					new Noty({
 						type: 'error',
-						text:
-							'Soory, an error occured during your registration process.',
+						text: 'Sorry, an error occured and you could not register.',
 						timeout: 5000,
 						theme: 'metroui'
 					}).show()
 				}
-            },
-            switchToLogin() {
-                this.$store.commit('closeRegisterModal')
-                this.$store.commit('openLoginModal')
 			},
-            closeRegisterModal () {
-                this.$store.commit('closeRegisterModal')
-            }
+			switchToLogin() {
+				this.$store.commit('closeRegisterModal')
+				this.$store.commit('openLoginModal')
+			},
+			closeRegisterModal() {
+				this.$store.commit('closeRegisterModal')
+			}
+		},
+		watch: {
+			birthdayMenu(val) {
+				val && setTimeout(() => (this.$refs.picker.activePicker = 'YEAR'))
+			}
 		}
 	}
 </script>

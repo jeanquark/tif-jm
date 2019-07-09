@@ -537,7 +537,6 @@
     }
     .right-column {
         background:#000;
-        // border: 1px solid green;
     }
     .right-column-item {
         font-size: 1.4em;

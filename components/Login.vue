@@ -92,7 +92,7 @@
 
                 <v-btn
                     flat
-                    color="primary"
+                    color="default"
                     class="mt-3"
                     @click.stop="closeLoginModal"
                 >Cancel</v-btn>
@@ -103,6 +103,7 @@
 </template>
 
 <script>
+	import Noty from 'noty'
 	export default {
 		mounted() {
 			this.$store.commit('clearError')
@@ -141,7 +142,6 @@
 						theme: 'metroui'
 					}).show()
 					this.$router.replace('/gamemode')
-					this.$store.commit('closeLoginModal')
 				} catch (error) {
 					console.log('error: ', error)
 					new Noty({
@@ -151,6 +151,7 @@
 						theme: 'metroui'
 					}).show()
 				} finally {
+					this.$store.commit('closeLoginModal')
 					this.loadingGoogle = false
 				}
 			},
@@ -194,9 +195,5 @@
 <style scoped>
 	.card-title {
 		background: var(--v-primary-base);
-	}
-	.card-text {
-	}
-	.card-actions {
 	}
 </style>
