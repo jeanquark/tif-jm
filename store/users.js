@@ -18,31 +18,30 @@ function b64DecodeUnicode(str) {
 
 export const state = () => ({
     loadedUser: null,
-    loadedAllUsers: [],
-    loadedAvatarImages: [],
-    loadedUserTeams: [],
-    updateUser: null,
+    // loadedAllUsers: [],
+    // loadedAvatarImages: [],
+    // loadedUserTeams: [],
+    // updateUser: null,
 })
 
 export const mutations = {
     setLoadedUser(state, payload) {
-        console.log('entering setLoadedUser mutation')
         state.loadedUser = payload
     },
-    setAllUsers(state, payload) {
-        state.loadedAllUsers = payload
-    },
-    setAvatarImages(state, payload) {
-        state.loadedAvatarImages = payload
-    },
-    setUserTeams(state, payload) {
-        // console.log('call to setUserTeams mutation')
-        state.loadedUserTeams = payload
-    },
-    setUpdateUser(state, payload) {
-        // console.log('entering setUpdatedUser mutation')
-        state.updateUser = payload
-    }
+    // setAllUsers(state, payload) {
+    //     state.loadedAllUsers = payload
+    // },
+    // setAvatarImages(state, payload) {
+    //     state.loadedAvatarImages = payload
+    // },
+    // setUserTeams(state, payload) {
+    //     // console.log('call to setUserTeams mutation')
+    //     state.loadedUserTeams = payload
+    // },
+    // setUpdateUser(state, payload) {
+    //     // console.log('entering setUpdatedUser mutation')
+    //     state.updateUser = payload
+    // }
 }
 
 export const actions = {
@@ -120,8 +119,6 @@ export const actions = {
     fetchUser ({ commit }, payload) {
         console.log('Entering fetchUser action: ')
         const userId = payload.userId
-        // const userId = 'zoKAPbbEQ5Q0ENXBzarjQw2WyEZ2'
-        // const userId = firebase.auth().currentUser.uid
         firebase.database().ref(`/users/${userId}`).on('value', function(snapshot) {
             commit('setLoadedUser', snapshot.val())
         })

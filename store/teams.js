@@ -14,6 +14,11 @@ export const mutations = {
     setTeam (state, payload) {
         state.loadedTeam = payload
     },
+    setTeamsByCompetition (state, payload) {
+        console.log('payload: ', payload)
+        // state.loadedTeams.payload.competition] = payload.teams
+        state.loadedTeams = Object.assign({}, state.loadedTeams, { [payload.competition]: payload.teams })
+    },
 	setTeams (state, payload) {
         state.loadedTeams = payload
     },
@@ -34,6 +39,17 @@ export const actions = {
         console.log('team.val(): ', team.val())
         commit('setTeam', team.val())
         // return team
+    },
+    // Fetch teams by country
+    fetchTeamsByCompetition ({ commit }, payload) {
+        console.log('payload: ', payload)
+        firebase.database().ref('/teams/').orderByChild(`competitions/${payload}`).equalTo(true).on('value', function (snapshot) {
+            const teamsArray = []
+            for (const key in snapshot.val()) {
+                teamsArray.push({ ...snapshot.val()[key], id: key })
+            }
+            commit('setTeamsByCompetition', { competition: payload, teams: teamsArray })
+        })
     },
 	// Load all teams
 	loadedTeams ({commit}) {

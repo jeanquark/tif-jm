@@ -168,7 +168,9 @@
         "auth/invalid-email": "The email address is badly formatted.",
         "auth/wrong-password": "The password is invalid or the user does not have a password.",
         "auth/user-not-found": "There is no user record corresponding to this identifier. The user may have been deleted.",
-        "auth/network-request-failed": "Network request failed."
+        "auth/network-request-failed": "Network request failed.",
+        "auth/account-exists-with-different-credential": "An account already exists with this email address but a different authentification method."
+
     },
     "continents": {
         "Europa": "Europa",

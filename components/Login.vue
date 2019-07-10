@@ -47,6 +47,7 @@
 
 					<v-btn
 					    color="success"
+						:loading="loadingSignIn"
 					    @click="signUserIn"
 					>Login</v-btn>
 				</v-flex>
@@ -75,6 +76,7 @@
 					    color="#3c5a99"
 					    class="white--text"
 					    :loading="loadingFacebook"
+						@click="signInWithFacebook"
 					>Login with Facebook&nbsp;
 						<font-awesome-icon :icon="['fab', 'facebook-f']" />
 					</v-btn>
@@ -114,6 +116,7 @@
 					email: '',
 					password: ''
 				},
+				loadingSignIn: false,
 				loadingGoogle: false,
 				loadingFacebook: false
 			}
@@ -124,61 +127,56 @@
 			}
 		},
 		methods: {
-			signUserIn() {
-				console.log('Sign user in')
-				this.$store.dispatch('firebase-auth/signUserIn', this.form)
-			},
+			async signUserIn () {
+                try {
+					this.loadingSignIn = true
+                    await this.$store.dispatch('firebase-auth/signUserIn', this.form)
+					this.$router.replace('/gamemode')
+                    this.$store.commit('closeLoginModal')
+                } catch (error) {
+					this.loadingSignIn = false
+                    new Noty({
+                        type: "error",
+                        text: "Sorry, an error occured and you could not log in.",
+                        timeout: 5000,
+                        theme: "metroui"
+                    }).show()
+                }
+            },
 			async signInWithGoogle() {
 				try {
-					console.log('signInWithGoogle')
 					this.loadingGoogle = true
 					await this.$store.dispatch(
 						'firebase-auth/signInWithGooglePopup'
 					)
-					new Noty({
-						type: 'success',
-						text: 'Login went successfully!',
-						timeout: 5000,
-						theme: 'metroui'
-					}).show()
 					this.$router.replace('/gamemode')
+					this.$store.commit('closeLoginModal')
 				} catch (error) {
-					console.log('error: ', error)
+					this.loadingGoogle = false
 					new Noty({
 						type: 'error',
 						text: 'Sorry, an error occured and you could not log in.',
 						timeout: 5000,
 						theme: 'metroui'
 					}).show()
-				} finally {
-					this.$store.commit('closeLoginModal')
-					this.loadingGoogle = false
 				}
 			},
 			async signInWithFacebook() {
 				try {
-					console.log('signInWithFacebook')
 					this.loadingFacebook = true
 					await this.$store.dispatch(
 						'firebase-auth/signInWithFacebookPopup'
 					)
-					new Noty({
-						type: 'success',
-						text: 'Login went successfully!',
-						timeout: 5000,
-						theme: 'metroui'
-					}).show()
 					this.$router.replace('/gamemode')
+					this.$store.commit('closeLoginModal')
 				} catch (error) {
-					console.log('error: ', error)
+					this.loadingFacebook = false
 					new Noty({
 						type: 'error',
 						text: 'Sorry, an error occured and you could not log in.',
 						timeout: 5000,
 						theme: 'metroui'
 					}).show()
-				} finally {
-					this.loadingFacebook = false
 				}
             },
             closeLoginModal() {

@@ -139,29 +139,19 @@
 		},
 		components: { Login, Register, ForgotPassword },
 		mounted () {
-			new Noty({
-				type: 'success',
-				text: 'Welcome!',
-				timeout: 5000,
-				theme: 'metroui'
-			}).show()
 		},
 		data() {
 			return {
-				// index: 0,
-				// pageNum: 0,
 				opts: {
 					start: 0,
 					dir: 'v',
 					loop: false,
 					duration: 300,
 					beforeChange: function(ele, current, next) {
-						// console.log('before', current, next)
 						this.index = next
 					},
 					afterChange: function(ele, current) {
 						this.index = current
-						// console.log('after', current)
 					}
 				},
 				forgotPasswordModal: false
@@ -181,14 +171,11 @@
 		methods: {
 			openLoginModal () {
 				this.$validator.reset() // Clear validator errors
-				// this.message = null
 				this.$store.commit('clearError')
 				this.$store.commit('setLoading', false)
-				// this.loginModal = true
 				this.$store.commit('openLoginModal')
 			},
 			closeLoginModal () {
-				// this.loginModal = false
 				this.$store.commit('closeLoginModal')
 			},
 			openRegisterModal () {
@@ -200,15 +187,6 @@
 			closeRegisterModal () {
                 this.$store.commit('closeRegisterModal')
 			},
-			// switchToLogin () {
-            //     this.registerModal = false
-            //     this.
-			// 	this.$store.commit('openLoginModal')
-			// },
-			// switchToRegister () {
-			// 	this.$store.commit('closeLoginModal')
-			// 	this.registerModal = true
-			// },
 			switchToForgotPassword () {
 				this.$store.commit('closeLoginModal')
 				this.forgotPasswordModal = true
