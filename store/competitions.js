@@ -27,6 +27,9 @@ export const mutations = {
 }
 
 export const actions = {
+    fetchCompetitionsByCountry ({ commit }, payload) {
+        console.log('fetchCompetitionsByCountry: ', payload)
+    },
     // Load all competitions
     loadedCompetitions ({commit}) {
         console.log('loadedCompetitions')
