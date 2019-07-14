@@ -1,7 +1,8 @@
 import * as firebase from 'firebase/app'
 
 export const state = () => ({
-	loadedCountries: []
+	loadedCountries: [],
+	loadedCountriesByConfederation: []
 })
 
 export const mutations = {
@@ -9,7 +10,7 @@ export const mutations = {
         state.loadedCountries = payload
 	},
 	setCountriesByConfederation (state, payload) {
-		state.loadedCountries = Object.assign({}, state.loadedCountries, { [payload.confederation]: payload.countries })
+		state.loadedCountriesByConfederation = Object.assign({}, state.loadedCountriesByConfederation, { [payload.confederation]: payload.countries })
 	}
 }
 
@@ -42,5 +43,8 @@ export const actions = {
 export const getters = {
 	loadedCountries(state) {
         return state.loadedCountries
-    }
+	},
+	loadedCountriesByConfederation(state) {
+		return state.loadedCountriesByConfederation
+	}
 }

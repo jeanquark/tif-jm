@@ -4,7 +4,8 @@ import Noty from 'noty'
 import axios from 'axios'
 
 export const state = () => ({
-    loadedCompetitions: []
+	loadedCompetitions: [],
+	loadedCompetitionsByCountry: []
 })
 
 export const mutations = {
@@ -16,7 +17,7 @@ export const mutations = {
     },
     setCompetitionsByCountry(state, payload) {
         // state.loadedCompetitions = payload
-        state.loadedCompetitions = Object.assign({}, state.loadedCompetitions, {
+        state.loadedCompetitionsByCountry = Object.assign({}, state.loadedCompetitionsByCountry, {
             [payload.country]: payload.competitions
         })
     },
@@ -34,7 +35,8 @@ export const mutations = {
 
 export const actions = {
     fetchCompetitionsByCountry({ commit }, payload) {
-        return new Promise((resolve) => {
+        // return new Promise((resolve) => {
+		try {
             console.log('fetchCompetitionsByCountry store: ', payload)
             firebase
                 .database()
@@ -54,9 +56,12 @@ export const actions = {
                         country: payload,
                         competitions: competitionsArray
                     })
-                    resolve()
+                    // resolve()
                 })
-        })
+		// })
+			} catch (error) {
+				throw error
+			}
     },
     // Load all competitions
     loadedCompetitions({ commit }) {
@@ -255,5 +260,8 @@ export const actions = {
 export const getters = {
     loadedCompetitions(state) {
         return state.loadedCompetitions
-    }
+	},
+	loadedCompetitionsByCountry (state) {
+		return state.loadedCompetitionsByCountry
+	}
 }
