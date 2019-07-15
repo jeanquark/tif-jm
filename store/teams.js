@@ -7,7 +7,8 @@ axios.defaults.headers.post['Content-Type'] = 'multipart/form-data'
 
 export const state = () => ({
     loadedTeam: {},
-    loadedTeams: []
+    loadedTeams: [],
+    loadedTeamsByCompetition: []
 })
 
 export const mutations = {
@@ -15,9 +16,9 @@ export const mutations = {
         state.loadedTeam = payload
     },
     setTeamsByCompetition(state, payload) {
-        console.log('payload: ', payload)
+        console.log('payload2: ', payload)
         // state.loadedTeams.payload.competition] = payload.teams
-        state.loadedTeams = Object.assign({}, state.loadedTeams, {
+        state.loadedTeamsByCompetition = Object.assign({}, state.loadedTeamsByCompetition, {
             [payload.competition]: payload.teams
         })
     },
@@ -51,7 +52,8 @@ export const actions = {
     },
     // Fetch teams by country
     fetchTeamsByCompetition({ commit }, payload) {
-        return new Promise((resolve) => {
+        // return new Promise((resolve) => {
+        try {
             console.log('payload: ', payload)
             firebase
                 .database()
@@ -63,13 +65,16 @@ export const actions = {
                     for (const key in snapshot.val()) {
                         teamsArray.push({ ...snapshot.val()[key], id: key })
                     }
+                    console.log('teamsArray2: ', teamsArray)
                     commit('setTeamsByCompetition', {
                         competition: payload,
                         teams: teamsArray
                     })
-                    resolve()
                 })
-        })
+        // })
+        } catch (error) {
+            throw error
+        }
     },
     // Load all teams
     loadedTeams({ commit }) {
@@ -217,5 +222,8 @@ export const getters = {
     },
     loadedTeams(state) {
         return state.loadedTeams
+    },
+    loadedTeamsByCompetition(state) {
+        return state.loadedTeamsByCompetition
     }
 }

@@ -16,13 +16,12 @@ export const mutations = {
 
 export const actions = {
 	fetchCountriesByConfederation ({ commit }, payload) {
-		console.log('payload2: ', payload)
 		firebase.database().ref('/countries').orderByChild('confederation/slug').equalTo(payload).on('value', function (snapshot) {
 			const countriesArray = []
 			for (const key in snapshot.val()) {
 				countriesArray.push({ ...snapshot.val()[key], id: key})
 			}
-			const abc = countriesArray.sort((a, b) => a.ranking - b.ranking)
+			const abc = countriesArray.sort((a, b) => a.ranking_confederation - b.ranking_confederation)
 			console.log('countriesArray: ', countriesArray)
 			commit('setCountriesByConfederation', { confederation: payload, countries: abc })
 		})

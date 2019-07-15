@@ -11,6 +11,7 @@
           <br />
           <br />
           loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br />
+          loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br />
           <!-- loadedCountries: {{ loadedCountries }}<br /><br /> -->
           <!-- loadedTeams['spanish_la_liga_2018_2019']: {{ loadedTeams['spanish_la_liga_2018_2019'] }}<br /><br /> -->
           <!-- loadedTeams['english_premier_league_2018_2019']: {{ loadedTeams['english_premier_league_2018_2019'] }}<br /><br /> -->
@@ -48,6 +49,7 @@
         <br />
         <br />
         <!-- Confederations tabs -->
+        <!-- @change="changeConfederation(selectedConfederation.slug, active_confederation_tab)" -->
         <v-tabs
           	color="green"
           	dark
@@ -107,7 +109,23 @@
 			>
 				{{ competition.name }}
 			</v-tab>
+            <v-tab-item
+                v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]"
+                :key="index"
+            >
+                <!-- <div v-for="team in loadedTeamsByCompetition" :key="team.slug">
+                    {{ team }}
+                </div> -->
+                <v-layout row wrap align-center justify-center v-if="selectedCompetition">
+                    <v-flex xs6 sm4 md3 class="text-xs-center pa-2" v-for="team in loadedTeamsByCompetition[selectedCompetition.slug]" :key="team.slug">
+                        <!-- {{ team.name }} -->
+                        <img :src="`/images/teams/${team.image}`" width="80%" class="" style="border: 2px solid green;">
+                    </v-flex>
+                </v-layout>
+            </v-tab-item>
 		</v-tabs>
+
+
       </v-container>
     </v-content>
   </v-app>
@@ -197,183 +215,124 @@ export default {
                 }
             ]
         },
-        countries() {
-            return [
-                {
-                    name: 'Spain',
-                    slug: 'spain',
-                    image: 'spain.png',
-                    confederation: {
-                        name: 'UEFA',
-                        slug: 'uefa'
-                    }
-                },
-                {
-                    name: 'United Kingdom',
-                    slug: 'united_kingdom',
-                    image: 'united_kingdom.png',
-                    confederation: {
-                        name: 'UEFA',
-                        slug: 'uefa'
-                    }
-                },
-                {
-                    name: 'United States',
-                    slug: 'united_states',
-                    image: 'united_states.png',
-                    confederation: {
-                        name: 'CONCACAF',
-                        slug: 'concacaf'
-                    }
-                },
-                {
-                    name: 'Canada',
-                    slug: 'canada',
-                    image: 'canada.png',
-                    confederation: {
-                        name: 'CONCACAF',
-                        slug: 'concacaf'
-                    }
-                },
-                {
-                    name: 'Mexico',
-                    slug: 'mexico',
-                    image: 'mexico.png',
-                    confederation: {
-                        name: 'CONCACAF',
-                        slug: 'concacaf'
-                    }
-                }
-            ]
-        },
-        // loadedCountries() {
-        //     return this.$store.getters['countries/loadedCountries']
-        //     // if (this.selectedConfederation) {
-        //     // 	console.log('this.selectedConfederation: ', this.selectedConfederation)
-        //     // 	return this.$store.getters['countries/loadedCountries'][
-        //     // 		this.selectedConfederation.slug
-        //     // 	]
-        //     // }
-        //     // return null
+        // countries() {
+        //     return [
+        //         {
+        //             name: 'Spain',
+        //             slug: 'spain',
+        //             image: 'spain.png',
+        //             confederation: {
+        //                 name: 'UEFA',
+        //                 slug: 'uefa'
+        //             }
+        //         },
+        //         {
+        //             name: 'United Kingdom',
+        //             slug: 'united_kingdom',
+        //             image: 'united_kingdom.png',
+        //             confederation: {
+        //                 name: 'UEFA',
+        //                 slug: 'uefa'
+        //             }
+        //         },
+        //         {
+        //             name: 'United States',
+        //             slug: 'united_states',
+        //             image: 'united_states.png',
+        //             confederation: {
+        //                 name: 'CONCACAF',
+        //                 slug: 'concacaf'
+        //             }
+        //         },
+        //         {
+        //             name: 'Canada',
+        //             slug: 'canada',
+        //             image: 'canada.png',
+        //             confederation: {
+        //                 name: 'CONCACAF',
+        //                 slug: 'concacaf'
+        //             }
+        //         },
+        //         {
+        //             name: 'Mexico',
+        //             slug: 'mexico',
+        //             image: 'mexico.png',
+        //             confederation: {
+        //                 name: 'CONCACAF',
+        //                 slug: 'concacaf'
+        //             }
+        //         }
+        //     ]
         // },
         loadedCountriesByConfederation() {
-            return this.$store.getters[
-                'countries/loadedCountriesByConfederation'
-            ]
+            return this.$store.getters['countries/loadedCountriesByConfederation']
 		},
 		loadedCompetitionsByCountry() {
 			return this.$store.getters['competitions/loadedCompetitionsByCountry']
-		}
+        },
+        loadedTeamsByCompetition() {
+            return this.$store.getters['teams/loadedTeamsByCompetition']
+        }
     },
     methods: {
-        // updateConfederation() {
-        //     this.selectedConfederation = this.confederations[
-        //         this.active_confederation_tab
-        //     ]
-        //     this.abc = this.selectedConfederation.slug
-        // },
         async changeConfederation() {
-            // console.log('changeConfederation', $event)
-            // this.active_confederation_tab = $event
-            // this.active_country_tab = 0
-            // this.selectedConfederation = this.confederations[
-            //     this.active_confederation_tab
-            // ]
-            // if (
-            //     !this.loadedCountriesByConfederation[
-            //         this.selectedConfederation.slug
-            //     ]
-            // ) {
-            //     console.log('Call fetchCountriesByConfederation')
-            //     await this.fetchCountriesByConfederation(
-            //         this.selectedConfederation.slug
-            //     )
-            // }
-
-
-            console.log(
-                'this.active_confederation_tab: ',
-                this.active_confederation_tab
-            )
+            // console.log('confederationSlug: ', confederationSlug)
+            // console.log('confederationTab: ', confederationTab)
+            console.log('this.active_confederation_tab: ', this.active_confederation_tab)
             // this.active_country_tab = 0
             // console.log(this.confederations[confederationIndex])
             // if (!this.loadedCountries[this.selectedConfederation.slug]) {
-            this.selectedConfederation = this.confederations[
-                this.active_confederation_tab
-            ]
+            this.selectedConfederation = this.confederations[this.active_confederation_tab]
             if (!this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
             	console.log('Call fetchCountriesByConfederation')
-            	await this.fetchCountriesByConfederation(
-                	this.selectedConfederation.slug
-            	)
+            	await this.fetchCountriesByConfederation(this.selectedConfederation.slug)
             }
             // this.active_country_tab = 0
         },
         async changeCountry() {
-			console.log('changeCountry')
-			this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
-			if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
-				console.log('Call fetchCompetitionsByCountry')
-				await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
-			}
-			
-
-            // this.active_country_tab = $event
-            // this.selectedCountry = this.loadedCountriesByConfederation[
-            //     this.active_country_tab
-			// ]
-			
-
-            // console.log('this.active_country_tab: ', this.active_country_tab)
-            // if (this.loadedCountries && countryIndex) {
-            // this.selectedCountry = this.loadedCountriesByConfederation[countryIndex]
-            // this.selectedCountry = this.loadedCountries
-            // if (this.loadedCompetitions[this.selectedCounty.slug].length < 1) {
-            // await this.fetchCompetitionsByCountry(this.selectedCountry)
-            // }
-            // }
+            console.log('changeCountry2')
+            if (this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
+                this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
+                // this.selectedCountry = this.loadedCountriesByConfederation['concacaf'][0]
+                if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
+                    console.log('Call fetchCompetitionsByCountry')
+                    await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
+                }
+            }
 		},
 		async changeCompetition() {
-			// console.log('changeCompetition: ')
-			// console.log(
-			// 	'this.active_competition_tab: ',
-			// 	this.active_competition_tab
-			// )
-			// console.log('this.loadedCompetitions: ', this.loadedCompetitions)
-			// if (this.loadedCompetitions && competitionIndex) {
-			// this.selectedCompetition = this.loadedCompetitions[competitionIndex]
-			// this.selectedCompetition = this.loadedCompetitions['english_premier_league_2018_2019']
-			// if (this.loadedTeams && this.loadedTeams[this.selectedCompetition.slug].length < 1) {
-			// await this.fetchTeamsByCompetition(this.selectedCompetition)
-			// }
-			// }
+            console.log('changeCompetition')
+            if (this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
+                this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
+                if (!this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
+                    console.log('Call fetchTeamsByCompetition')
+                    await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
+                }
+            }
+        },
+        
 
-			console.log('changeCompetition')
-			this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
-			// this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][1]
-			// if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
-				// console.log('Call fetchCompetitionsByCountry')
-				// await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
-			// }
-		},
+
         async fetchCountriesByConfederation(confederationSlug) {
-            console.log('fetchCountriesByConfederation: ', confederationSlug)
-            // if (confederation && confederation.slug) {
-            await this.$store.dispatch(
-                'countries/fetchCountriesByConfederation',
-                confederationSlug
-            )
-            // }
+            try {
+                console.log('fetchCountriesByConfederation vue: ', confederationSlug)
+                await this.$store.dispatch('countries/fetchCountriesByConfederation', confederationSlug)
+            } catch (error) {
+                console.log('error: ', error)
+            }
 		},
 		async fetchCompetitionsByCountry(countrySlug) {
 			try {
 				console.log('fetchCompetitionsByCountry vue: ', countrySlug)
-				// if (country && country.slug) {
-				await this.$store.dispatch(
-					'competitions/fetchCompetitionsByCountry',
-					countrySlug
-				)
-				// }
+		        await this.$store.dispatch('competitions/fetchCompetitionsByCountry', countrySlug)
+			} catch (error) {
+				console.log('error: ', error)
+			}
+        },
+        async fetchTeamsByCompetition(competitionSlug) {
+			try {
+				console.log('fetchTeamsByCompetition vue: ', competitionSlug)
+		        await this.$store.dispatch('teams/fetchTeamsByCompetition', competitionSlug)
 			} catch (error) {
 				console.log('error: ', error)
 			}

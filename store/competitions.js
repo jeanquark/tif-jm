@@ -41,7 +41,10 @@ export const actions = {
             firebase
                 .database()
                 .ref('/competitions')
-                .orderByChild('/country/slug')
+                // .ref('/competitions/countries/germany')
+                .orderByChild(`countries/${payload}/slug`)
+                // .orderByChild('country/slug')
+                // .equalTo({ name: 'Germany', slug: 'germany'})
                 .equalTo(payload)
                 .on('value', function(snapshot) {
                     const competitionsArray = []
