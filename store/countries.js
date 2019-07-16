@@ -16,14 +16,20 @@ export const mutations = {
 
 export const actions = {
 	fetchCountriesByConfederation ({ commit }, payload) {
-		firebase.database().ref('/countries').orderByChild('confederation/slug').equalTo(payload).on('value', function (snapshot) {
-			const countriesArray = []
-			for (const key in snapshot.val()) {
-				countriesArray.push({ ...snapshot.val()[key], id: key})
-			}
-			const abc = countriesArray.sort((a, b) => a.ranking_confederation - b.ranking_confederation)
-			console.log('countriesArray: ', countriesArray)
-			commit('setCountriesByConfederation', { confederation: payload, countries: abc })
+		return new Promise((resolve) => {
+			firebase.database().ref('/countries').orderByChild('confederation/slug').equalTo(payload).on('value', function (snapshot) {
+				const countriesArray = []
+				for (const key in snapshot.val()) {
+					countriesArray.push({
+						...snapshot.val()[key],
+						id: key
+					})
+				}
+				const orderedCountries = countriesArray.sort((a, b) => a.ranking_confederation - b.ranking_confederation)
+				// console.log('countriesArray: ', countriesArray)
+				commit('setCountriesByConfederation', { confederation: payload, countries: orderedCountries })
+				resolve()
+			})
 		})
 	},
 	// Load all countries

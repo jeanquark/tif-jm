@@ -35,36 +35,25 @@ export const mutations = {
 
 export const actions = {
     fetchCompetitionsByCountry({ commit }, payload) {
-        // return new Promise((resolve) => {
-		try {
-            console.log('fetchCompetitionsByCountry store: ', payload)
-            firebase
-                .database()
-                .ref('/competitions')
-                // .ref('/competitions/countries/germany')
-                .orderByChild(`countries/${payload}/slug`)
-                // .orderByChild('country/slug')
-                // .equalTo({ name: 'Germany', slug: 'germany'})
-                .equalTo(payload)
-                .on('value', function(snapshot) {
-                    const competitionsArray = []
-                    for (const key in snapshot.val()) {
-                        competitionsArray.push({
-                            ...snapshot.val()[key],
-                            id: key
-                        })
-                    }
-                    console.log('competitionsArray: ', competitionsArray)
-                    commit('setCompetitionsByCountry', {
-                        country: payload,
-                        competitions: competitionsArray
+        return new Promise((resolve) => {
+            // console.log('fetchCompetitionsByCountry store: ', payload)
+            firebase.database().ref('/competitions').orderByChild(`countries/${payload}/slug`).equalTo(payload).on('value', function(snapshot) {
+                const competitionsArray = []
+                for (const key in snapshot.val()) {
+                    competitionsArray.push({
+                        ...snapshot.val()[key],
+                        id: key
                     })
-                    // resolve()
+                }
+                // console.log('competitionsArray: ', competitionsArray)
+				const orderedCompetitions = competitionsArray.sort((a, b) => a.ranking_country - b.ranking_country)
+                commit('setCompetitionsByCountry', {
+                    country: payload,
+                    competitions: orderedCompetitions
                 })
-		// })
-			} catch (error) {
-				throw error
-			}
+                resolve()
+            })
+        })
     },
     // Load all competitions
     loadedCompetitions({ commit }) {

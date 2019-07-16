@@ -52,29 +52,24 @@ export const actions = {
     },
     // Fetch teams by country
     fetchTeamsByCompetition({ commit }, payload) {
-        // return new Promise((resolve) => {
-        try {
-            console.log('payload: ', payload)
-            firebase
-                .database()
-                .ref('/teams/')
-                .orderByChild(`competitions/${payload}`)
-                .equalTo(true)
-                .on('value', function(snapshot) {
-                    const teamsArray = []
-                    for (const key in snapshot.val()) {
-                        teamsArray.push({ ...snapshot.val()[key], id: key })
-                    }
-                    console.log('teamsArray2: ', teamsArray)
-                    commit('setTeamsByCompetition', {
-                        competition: payload,
-                        teams: teamsArray
+        return new Promise((resolve) => {
+            // console.log('payload: ', payload)
+            firebase.database().ref('/teams/').orderByChild(`competitions/${payload}`).equalTo(true).on('value', function(snapshot) {
+                const teamsArray = []
+                for (const key in snapshot.val()) {
+                    teamsArray.push({
+                        ...snapshot.val()[key],
+                        id: key
                     })
+                }
+                // console.log('teamsArray2: ', teamsArray)
+                commit('setTeamsByCompetition', {
+                    competition: payload,
+                    teams: teamsArray
                 })
-        // })
-        } catch (error) {
-            throw error
-        }
+                resolve()
+            })
+        })
     },
     // Load all teams
     loadedTeams({ commit }) {

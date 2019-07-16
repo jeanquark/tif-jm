@@ -3,8 +3,8 @@
     <v-content>
       <v-container style="padding: 0px; max-width: 1017px;">
         <h1>Gamemode</h1>
-        <p>
-          loadedUser: {{ loadedUser }}
+        <p style="display: none;">
+          <!-- loadedUser: {{ loadedUser }} -->
           <br />
           <br />
           loadedCountriesByConfederation: {{ loadedCountriesByConfederation }}
@@ -64,12 +64,13 @@
             	ripple
             	style="cursor: pointer;"
           	>
-            	<!-- <v-img :src="`/images/continents/${continent.image}`" :width="30"></v-img> -->
-            	<img :src="`/images/confederations/${confederation.image}`" width="60px" />
+            	<v-img :src="`/images/confederations/${confederation.image}`" :aspect-ratio="1" :max-width="50"></v-img>
+            	<!-- <img :src="`/images/confederations/${confederation.image}`" width="60px" /> -->
           	</v-tab>
         </v-tabs>
 
         <!-- Countries tabs -->
+        <!--  -->
         <v-tabs
           	color="blue"
           	dark
@@ -91,6 +92,7 @@
         </v-tabs>
 
        <!-- Competitions tabs -->
+       <!--  -->
 		<v-tabs
 			color="orange"
 			dark
@@ -117,9 +119,28 @@
                     {{ team }}
                 </div> -->
                 <v-layout row wrap align-center justify-center v-if="selectedCompetition">
-                    <v-flex xs6 sm4 md3 class="text-xs-center pa-2" v-for="team in loadedTeamsByCompetition[selectedCompetition.slug]" :key="team.slug">
-                        <!-- {{ team.name }} -->
-                        <img :src="`/images/teams/${team.image}`" width="80%" class="" style="border: 2px solid green;">
+                    <v-flex xs6 sm4 md3 class="text-xs-center" v-for="team in loadedTeamsByCompetition[selectedCompetition.slug]" :key="team.slug" style="border: 1px solid green;">
+                        <v-hover>
+                            <v-card slot-scope="{ hover }" class="card pt-2" :class="`${hover ? 'hover' : null}`" @click.stop="selectTeam(team)">
+                                <!-- {{ team }} -->
+                                <v-img :src="`/images/teams/${team.image}`" :lazy-src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4"></v-img>
+                                <v-card-actions style="border: 1px solid red;" class="justify-center">
+                                    <v-btn flat color="orange">Share</v-btn>
+                                    <v-btn flat color="orange">Explore</v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-hover>
+                        <!-- <div class="flip-card">
+                            <v-card hover class="flip-card-inner" :class="[ isFlipped[index] ? 'flipped' : '' ]" @click="toggleFlip(index)" style="border: 1px solid red;">
+                                <div class="flip-card-front">
+                                    <h1>Front</h1> 
+                                </div>
+                                <div class="flip-card-back">
+                                    <h1>Back</h1> 
+                                    <v-btn @click.stop="selectCard">Select card</v-btn>
+                                </div>
+                            </v-card>
+                        </div> -->
                     </v-flex>
                 </v-layout>
             </v-tab-item>
@@ -134,23 +155,31 @@
 <script>
 export default {
     async created() {
-		await this.fetchCountriesByConfederation('uefa')
+        // await this.fetchCountriesByConfederation('uefa')
+        await this.changeConfederation()
 	},
     data() {
         return {
             active_confederation_tab: 0,
             active_country_tab: 0,
             active_competition_tab: 0,
-            selectedConfederation: {
-                name: 'UEFA',
-                slug: 'uefa'
-            },
-            selectedCountry: {
-				name: 'Spain',
-				slug: 'spain'
-			},
-            selectedCompetition: null,
-            abc: 'uefa'
+            selectedConfederation: {},
+            selectedCountry: {},
+            selectedCompetition: {}
+            // selectedConfederation: {
+            //     name: 'UEFA',
+            //     slug: 'uefa'
+            // },
+            // selectedCountry: {
+			// 	name: 'Spain',
+			// 	slug: 'spain'
+			// },
+            // selectedCompetition: {
+            //     name: 'La Liga',
+            //     slug: 'spanish_la_liga_2018_2019'
+            // },
+            // abc: 'uefa',
+            // isFlipped: new Array(30)
         }
     },
     computed: {
@@ -166,7 +195,7 @@ export default {
                         name: 'Europe',
                         slug: 'europe'
                     },
-                    image: 'europe.png'
+                    image: 'europe2.png'
                 },
                 {
                     name: 'CONCACAF',
@@ -175,7 +204,7 @@ export default {
                         name: 'America',
                         slug: 'america'
                     },
-                    image: 'north_and_central_america.png'
+                    image: 'north_and_central_america2.png'
                 },
                 {
                     name: 'CONMEBOL',
@@ -184,7 +213,7 @@ export default {
                         name: 'America',
                         slug: 'america'
                     },
-                    image: 'south_america.png'
+                    image: 'south_america2.png'
                 },
                 {
                     name: 'CAF',
@@ -193,7 +222,7 @@ export default {
                         name: 'Africa',
                         slug: 'africa'
                     },
-                    image: 'africa.png'
+                    image: 'africa2.png'
                 },
                 {
                     name: 'AFC',
@@ -202,7 +231,7 @@ export default {
                         name: 'Asia',
                         slug: 'asia'
                     },
-                    image: 'asia.png'
+                    image: 'asia2.png'
                 },
                 {
                     name: 'OFC',
@@ -211,7 +240,7 @@ export default {
                         name: 'Oceania',
                         slug: 'oceania'
                     },
-                    image: 'oceania.png'
+                    image: 'oceania2.png'
                 }
             ]
         },
@@ -276,37 +305,60 @@ export default {
     },
     methods: {
         async changeConfederation() {
-            // console.log('confederationSlug: ', confederationSlug)
-            // console.log('confederationTab: ', confederationTab)
-            console.log('this.active_confederation_tab: ', this.active_confederation_tab)
-            // this.active_country_tab = 0
-            // console.log(this.confederations[confederationIndex])
-            // if (!this.loadedCountries[this.selectedConfederation.slug]) {
+            console.log('changeConfederation')
+            
+            // console.log('this.active_confederation_tab: ', this.active_confederation_tab)
+            
             this.selectedConfederation = this.confederations[this.active_confederation_tab]
             if (!this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
-            	console.log('Call fetchCountriesByConfederation')
-            	await this.fetchCountriesByConfederation(this.selectedConfederation.slug)
+                console.log('Call fetchCountriesByConfederation')
+                await this.fetchCountriesByConfederation(this.selectedConfederation.slug)
+                // console.log('Done fetching countries by confederation. Continue.')
             }
-            // this.active_country_tab = 0
+            // console.log('Go on!')
+            this.active_country_tab = 0
+            this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
+
+            if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
+                console.log('Call fetchCompetitionsByCountry')
+                await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
+                // console.log('Done fetching competitions by country. Continue.')
+                
+            }
+            this.active_competition_tab = 0
+            this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
+
+            if (!this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
+                console.log('Call fetchTeamsByCompetition')
+                await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
+                // console.log('Done fetching teams by competition. Continue.')
+            }
+            
+            // console.log('abc')
         },
-        async changeCountry() {
-            console.log('changeCountry2')
+        async changeCountry () {
+            console.log('changeCountry')
             if (this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
                 this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
-                // this.selectedCountry = this.loadedCountriesByConfederation['concacaf'][0]
                 if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
-                    console.log('Call fetchCompetitionsByCountry')
                     await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
+                    // console.log('Done fetching competitions by country. Continue.')
+                    // console.log('Go on!')
                 }
+                this.active_competition_tab = 0
+                this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
             }
-		},
-		async changeCompetition() {
+        },
+        async changeCompetition() {
             console.log('changeCompetition')
             if (this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
+                // console.log('this.active_competition_tab: ', this.active_competition_tab)
                 this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
-                if (!this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
-                    console.log('Call fetchTeamsByCompetition')
+                // console.log('this.selectedCompetition: ', this.selectedCompetition)
+                if (this.selectedCompetition && !this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
                     await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
+                    console.log('Done fetching teams by competition. Continue.')
+                    // console.log('Go on!')
                 }
             }
         },
@@ -315,31 +367,46 @@ export default {
 
         async fetchCountriesByConfederation(confederationSlug) {
             try {
-                console.log('fetchCountriesByConfederation vue: ', confederationSlug)
+                // console.log('fetchCountriesByConfederation vue: ', confederationSlug)
                 await this.$store.dispatch('countries/fetchCountriesByConfederation', confederationSlug)
+                console.log('OK done fetching countries by confederation')
             } catch (error) {
                 console.log('error: ', error)
             }
 		},
 		async fetchCompetitionsByCountry(countrySlug) {
 			try {
-				console.log('fetchCompetitionsByCountry vue: ', countrySlug)
-		        await this.$store.dispatch('competitions/fetchCompetitionsByCountry', countrySlug)
+				// console.log('fetchCompetitionsByCountry vue: ', countrySlug)
+                await this.$store.dispatch('competitions/fetchCompetitionsByCountry', countrySlug)
+                console.log('OK done fetching competitions by country')
 			} catch (error) {
 				console.log('error: ', error)
 			}
         },
         async fetchTeamsByCompetition(competitionSlug) {
 			try {
-				console.log('fetchTeamsByCompetition vue: ', competitionSlug)
-		        await this.$store.dispatch('teams/fetchTeamsByCompetition', competitionSlug)
+				// console.log('fetchTeamsByCompetition vue: ', competitionSlug)
+                await this.$store.dispatch('teams/fetchTeamsByCompetition', competitionSlug)
+                console.log('OK done fetching teams by competition')
 			} catch (error) {
 				console.log('error: ', error)
 			}
-		}
+        },
+        
+
+
+        selectTeam (team) {
+            console.log('selectTeam: ', team)
+        }
     }
 }
 </script>
 
 <style scoped>
+    .card:hover {
+        cursor: pointer;
+    }
+    .hover {
+        border: 2px solid blue;
+    }
 </style>
