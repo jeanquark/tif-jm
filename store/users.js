@@ -381,8 +381,10 @@ export const actions = {
             commit("setError", error, { root: true })
         }
     },
-
-    async updateUserTeams({ commit, state, dispatch }, payload) {
+	async updateUserTeams ({ commit }, payload) {
+		// SEE userTeams.js file
+	},
+    async updateUserTeams2({ commit, state, dispatch }, payload) {
         try {
             const userId = firebase.auth().currentUser.uid
             console.log("userId: ", userId)
