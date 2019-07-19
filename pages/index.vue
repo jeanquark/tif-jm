@@ -139,6 +139,7 @@
 		},
 		components: { Login, Register, ForgotPassword },
 		mounted () {
+			// this.$store.commit('openLoginModal')
 		},
 		data() {
 			return {

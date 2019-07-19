@@ -155,7 +155,7 @@ module.exports = {
             handler: "~/serverMiddleware/api/fetchLeagueMatches"
         },
         {
-            path: "/api/fetch-next-matches", // GET request
+            path: "/api/fetch-next-matches", // POST request with { until = 15 } as body data
             handler: "~/serverMiddleware/api/fetchNextMatches"
         },
         {
@@ -173,6 +173,10 @@ module.exports = {
         {
             path: "/api/fetch-ending-matches", // GET request
             handler: "~/serverMiddleware/api/fetchEndingMatches"
+		},
+		{
+            path: "/api/fetch-competitions-by-season", // POST request with {season = 2019 } as body data
+            handler: "~/serverMiddleware/api/fetchCompetitionsBySeason"
         },
         // {
         //     path: "/api/fetch-league-standing",

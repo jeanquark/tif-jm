@@ -16,32 +16,103 @@ export const mutations = {
 
 export const actions = {
     fetchUserTeams({ commit, rootGetters }) {
-		return new Promise((resolve, reject) => {
-			const userId = rootGetters['users/loadedUser'].id
-			try {
-				firebase.database().ref(`userTeams/${userId}`).on('value', function (snapshot) {
-					commit('setUserTeams', snapshot.val())
-					resolve()
-				})
-			} catch (error) {
-				reject(error)
-			}
-		})
+        return new Promise((resolve, reject) => {
+            const userId = rootGetters['users/loadedUser'].id
+            try {
+                firebase
+                    .database()
+                    .ref(`userTeams/${userId}`)
+                    .on('value', function(snapshot) {
+						const teamsArray = []
+						for (const key in snapshot.val()) {
+							teamsArray.push({
+								...snapshot.val()[key],
+								id: key
+							})
+						}
+                        commit('setUserTeams', teamsArray)
+                        resolve()
+                    })
+            } catch (error) {
+                reject(error)
+            }
+        })
     },
-    updateUserTeams({ commit, rootGetters }, payload) {
-		try {
-			console.log('updateUserTeams: ', payload)
-			const userId = rootGetters['users/loadedUser'].id
-			firebase.database().ref(`userTeams/${userId}/${payload.slug}`).update({
-				name: payload.name,
-				slug: payload.slug,
-				image: payload.image,
-				country: payload.country,
-				_updated_at: moment().unix()
-			})
-		} catch (error) {
-			throw error
-		}
+    async selectUserTeam({ commit, rootGetters }, payload) {
+        try {
+            console.log('selectUserTeams: ', payload)
+            const userId = rootGetters['users/loadedUser'].id
+
+            // Update userTeams node
+            await firebase
+                .database()
+                .ref(`userTeams/${userId}/${payload.slug}`)
+                .update({
+                    name: payload.name,
+                    slug: payload.slug,
+                    image: payload.image,
+                    country: payload.country,
+                    _created_at: moment().unix()
+                })
+
+            // Update teamUser node
+            await firebase
+                .database()
+                .ref(`teamUsers/${payload.slug}`)
+                .update({
+                    [userId]: true
+                })
+
+            // Update team counter with a transaction
+            await firebase
+                .database()
+                .ref(`teams/${payload.slug}`)
+                .transaction(function(team) {
+                    if (team) {
+                        if (!team.usersCount) {
+                            team.usersCount = 1
+                        } else {
+                            team.usersCount++
+                        }
+                    }
+                    return team
+                })
+        } catch (error) {
+            throw error
+        }
+    },
+    async deselectUserTeam({ commit, rootGetters }, payload) {
+        try {
+            console.log('deselectUserTeam: ', payload)
+            const userId = rootGetters['users/loadedUser'].id
+
+            // Update userTeams node
+            await firebase
+                .database()
+                .ref(`userTeams/${userId}/${payload.slug}`)
+                .remove()
+
+            // Update teamUser node
+            await firebase
+                .database()
+                .ref(`teamUsers/${payload.slug}`)
+                .remove()
+
+            // Update team counter through transaction
+            const teamRef = firebase.database().ref(`teams/${payload.slug}`)
+            await teamRef.transaction(function(team) {
+                if (team) {
+                    if (!team.usersCount) {
+                        team.usersCount = 0
+                    } else {
+                        team.usersCount--
+                    }
+                }
+                return team
+            })
+        } catch (error) {
+            throw error
+        }
     }
 }
 

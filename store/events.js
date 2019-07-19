@@ -6,7 +6,7 @@ import moment from 'moment'
 
 export const state = () => ({
     // loadedEvents: [],
-    loadedEvents: {},
+    loadedEventsByDay: {},
     // loadedEventUsers: [],
     // loadedLiveEvents: [],
     // loadedCompetitionEvents: []
@@ -20,18 +20,31 @@ export const mutations = {
     // setEvents(state, payload) {
     //     state.loadedEvents = payload
     // },
-    setEvents (state, payload) {
-        // console.log('Call to setEvents mutation', payload)
-        state.loadedEvents = Object.assign({}, state.loadedEvents, { [payload.date]: payload })
+    setEventsByDay(state, payload) {
+		console.log('Call to setEventsByDay mutation', payload)
+		state.loadedEventsByDay = payload
+        // state.loadedEventsByDay = Object.assign({}, state.loadedEventsByDay, {
+        //     [payload.date]: payload
+        // })
     },
-    setEventsByCompetitionByRound (state, payload) {
+    setEventsByCompetitionByRound(state, payload) {
         console.log('payload2: ', payload)
         // console.log('competitionId: ', payload.competition)
         const competition = payload.competition
         console.log('competition: ', competition)
         const round = payload.round
         console.log('round: ', round)
-        state.eventsByCompetitionByRound = Object.assign({}, state.eventsByCompetitionByRound, { [competition]: Object.assign({}, state.eventsByCompetitionByRound[competition], { [round]: payload.eventsArray }) })
+        state.eventsByCompetitionByRound = Object.assign(
+            {},
+            state.eventsByCompetitionByRound,
+            {
+                [competition]: Object.assign(
+                    {},
+                    state.eventsByCompetitionByRound[competition],
+                    { [round]: payload.eventsArray }
+                )
+            }
+        )
     },
     // addEvents(state, payload) {
     //     state.loadedEvents.push(...payload)
@@ -56,7 +69,7 @@ export const mutations = {
     //         1
     //     )
     // }
-    clearEvents (state) {
+    clearEvents(state) {
         state.loadedEvents = {}
     }
 }
@@ -193,23 +206,30 @@ export const actions = {
     //         }
     //     })
     // },
-    fetchEventsByDay ({ commit }, payload) {
-        const date = payload
-
-        firebase
-            .database()
-            .ref('/events_new3/')
-            .orderByChild('date')
-            .equalTo(date)
-            .on('value', function(snapshot) {
-                const eventsArray = []
-                snapshot.forEach((event) => {
-                    eventsArray.push({...event.val(), id: event.key}) 
-                })
-                const sortedEventsArray = eventsArray.sort((a, b) => a.timestamp - b.timestamp)
-                const events = {date: date, events: sortedEventsArray}
-                commit('setEvents', events)
-            })
+    fetchEventsByDay({ commit }, payload) {
+        try {
+			const date = payload
+			firebase
+				.database()
+				.ref('/events/')
+				.orderByChild('date')
+				.equalTo(date)
+				.on('value', function(snapshot) {
+					const eventsArray = []
+					snapshot.forEach(event => {
+						eventsArray.push({ ...event.val(), id: event.key })
+					})
+					const sortedEventsArray = eventsArray.sort(
+						(a, b) => a.timestamp - b.timestamp
+					)
+					// const events = { date: date, events: sortedEventsArray }
+					const events = { [date]: sortedEventsArray }
+					commit('setEventsByDay', events)
+				})
+			} catch (error) {
+				console.log('error: ', error)
+				throw error
+			}
     },
     // async loadedEventsByDay2 ({ commit }, payload) {
     //     try {
@@ -225,7 +245,7 @@ export const actions = {
     //         })
     //         console.log('eventsArray: ', eventsArray)
     //         commit('addEvents', eventsArray)
-            
+
     //         return eventsArray
     //     }
     //     catch(error) {
@@ -235,18 +255,18 @@ export const actions = {
     loadedCompetitionEvents({ commit }, payload) {
         // console.log('payload: ', payload)
         const competitionId = parseInt(payload.livescore_api_id)
-        console.log("competitionId: ", competitionId)
+        console.log('competitionId: ', competitionId)
         if (competitionId) {
             try {
                 firebase
                     .database()
-                    .ref("/events_new2/")
-                    .orderByChild("competition_id")
+                    .ref('/events_new2/')
+                    .orderByChild('competition_id')
                     .equalTo(competitionId)
                     // .orderByChild('date')
                     // .endAt('2018-11-20')
                     .limitToFirst(10)
-                    .on("value", function(snapshot) {
+                    .on('value', function(snapshot) {
                         const eventsArray = []
                         for (const key in snapshot.val()) {
                             eventsArray.push({
@@ -254,20 +274,20 @@ export const actions = {
                                 id: key
                             })
                         }
-                        console.log("eventsArray: ", eventsArray)
-                        commit("setCompetitionEvents", eventsArray)
+                        console.log('eventsArray: ', eventsArray)
+                        commit('setCompetitionEvents', eventsArray)
                         return eventsArray
                     })
             } catch (error) {
                 console.log(error)
                 new Noty({
-                    type: "error",
-                    text: "Events not found",
+                    type: 'error',
+                    text: 'Events not found',
                     timeout: 5000,
-                    theme: "metroui"
+                    theme: 'metroui'
                 }).show()
-                commit("setError", error, { root: true })
-                commit("setLoading", false, { root: true })
+                commit('setError', error, { root: true })
+                commit('setLoading', false, { root: true })
                 return error
             }
         }
@@ -298,7 +318,7 @@ export const actions = {
         // })
     },
 
-    fetchEventsByCompetitionByRound ({ commit }, payload) {
+    fetchEventsByCompetitionByRound({ commit }, payload) {
         const competition = payload.competition.toString()
         const round = payload.round
         console.log('competition: ', competition)
@@ -311,16 +331,19 @@ export const actions = {
                 .equalTo(competition)
                 .on('value', function(snapshot) {
                     const eventsArray = []
-                    snapshot.forEach((event) => {
+                    snapshot.forEach(event => {
                         // console.log('event.val().round_short: ', event.val().round_short)
                         if (event.val().round_short == round) {
-                            eventsArray.push({...event.val(), id: event.key})
+                            eventsArray.push({ ...event.val(), id: event.key })
                         }
-                        
                     })
                     eventsArray.sort((a, b) => a.timestamp - b.timestamp)
                     console.log('eventsArray: ', eventsArray)
-                    commit("setEventsByCompetitionByRound", { competition, round, eventsArray })
+                    commit('setEventsByCompetitionByRound', {
+                        competition,
+                        round,
+                        eventsArray
+                    })
                     // return eventsArray
                 })
         } catch (error) {
@@ -381,17 +404,14 @@ export const actions = {
     // Create a new event
     createEvent({ commit, getters }, payload) {
         // commit("setLoading", true, { root: true })
-
         // // Generate new unique key
         // const newEventKey = firebase
         //     .database()
         //     .ref()
         //     .child("/events_new/")
         //     .push().key
-
         // let updates = {}
         // updates["/events_new/" + newEventKey] = payload
-
         // firebase
         //     .database()
         //     .ref()
@@ -423,10 +443,8 @@ export const actions = {
     updateEvent({ commit, dispatch }, payload) {
         // commit("setLoading", true, { root: true })
         // console.log(payload)
-
         // let updates = {}
         // updates["/events_new/"] = payload
-
         // firebase
         //     .database()
         //     .ref()
@@ -454,7 +472,6 @@ export const actions = {
         //         }).show()
         //     })
     },
-
 
     // Delete an event
     deleteEvent({ commit }, eventId) {
@@ -488,8 +505,8 @@ export const actions = {
 }
 
 export const getters = {
-    loadedEvents (state) {
-        return state.loadedEvents
+    loadedEventsByDay(state) {
+        return state.loadedEventsByDay
     },
     // loadedCompetitionEvents(state) {
     //     return state.loadedCompetitionEvents
@@ -500,7 +517,7 @@ export const getters = {
     // loadedLiveEvents(state) {
     //     return state.loadedLiveEvents
     // }
-    loadedEventsByCompetitionByRound (state) {
+    loadedEventsByCompetitionByRound(state) {
         return state.eventsByCompetitionByRound
         // return state.loadedCompetitions
     }

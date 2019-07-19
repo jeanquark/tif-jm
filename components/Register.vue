@@ -138,7 +138,7 @@
 							    class="chip"
 							>
 								<v-avatar>
-									<img :src="`/images/countries/${data.item.flag}`">
+									<img :src="`/images/countries/${data.item.image}`">
 								</v-avatar>
 								{{ data.item.name }}
 							</v-chip>
@@ -152,7 +152,7 @@
 							</template>
 							<template v-else>
 								<v-list-tile-avatar>
-									<img :src="`/images/countries/${data.item.flag}`">
+									<img :src="`/images/countries/${data.item.image}`">
 								</v-list-tile-avatar>
 								<v-list-tile-content>
 									<v-list-tile-title v-html="data.item.name"></v-list-tile-title>

@@ -36,16 +36,18 @@ export const mutations = {
 export const actions = {
     fetchCompetitionsByCountry({ commit }, payload) {
         return new Promise((resolve) => {
-            // console.log('fetchCompetitionsByCountry store: ', payload)
+            console.log('fetchCompetitionsByCountry store: ', payload)
             firebase.database().ref('/competitions').orderByChild(`countries/${payload}/slug`).equalTo(payload).on('value', function(snapshot) {
                 const competitionsArray = []
                 for (const key in snapshot.val()) {
-                    competitionsArray.push({
-                        ...snapshot.val()[key],
-                        id: key
-                    })
+					if (snapshot.val()[key].active === true) {
+						competitionsArray.push({
+							...snapshot.val()[key],
+							id: key
+						})
+					}
                 }
-                // console.log('competitionsArray: ', competitionsArray)
+                console.log('competitionsArray: ', competitionsArray)
 				const orderedCompetitions = competitionsArray.sort((a, b) => a.ranking_country - b.ranking_country)
                 commit('setCompetitionsByCountry', {
                     country: payload,

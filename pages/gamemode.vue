@@ -1,18 +1,18 @@
 <template>
-    <v-app>
-        <v-content>
+    <!-- <v-app>
+        <v-content> -->
             <v-container style="padding: 0px; max-width: 1017px;">
                 <h1>Gamemode</h1>
                 <p style="display: inline;">
                     loadedUser: {{ loadedUser }}<br /><br />
-					loadedUserTeams: {{ loadedUserTeams }}<br /><br />
+                    loadedUserTeams: {{ loadedUserTeams }}<br /><br />
                     <!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
                     <!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
                     <!-- loadedCountries: {{ loadedCountries }}<br /><br /> -->
                     <!-- loadedTeams['spanish_la_liga_2018_2019']: {{ loadedTeams['spanish_la_liga_2018_2019'] }}<br /><br /> -->
                     <!-- loadedTeams['english_premier_league_2018_2019']: {{ loadedTeams['english_premier_league_2018_2019'] }}<br /><br /> -->
-                    
-					<!-- active_confederation_tab: {{ active_confederation_tab }}<br /><br /> -->
+
+                    <!-- active_confederation_tab: {{ active_confederation_tab }}<br /><br /> -->
                     <!-- active_country_tab: {{ active_country_tab }}<br /><br /> -->
                     <!-- active_competition_tab: {{ active_competition_tab }}<br /><br /> -->
                     <!-- selectedConfederation: {{ selectedConfederation }}<br /><br /> -->
@@ -20,8 +20,24 @@
                     <!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
                 </p>
                 <v-btn class="warning" @click.stop="logout">Logout</v-btn><br /><br /><br />
+
+                <nuxt-link to="/user/events">Events</nuxt-link>
+                <!-- <a href="/api/fetch-competitions">Fetch competitions</a> -->
+
+                <br /><br /><br /><br /><br />
+                <v-layout row wrap justify-center>
+                    <v-flex xs12 class="mb-2 text-xs-center">
+                        <h2>Your teams</h2>
+                    </v-flex>
+                    <v-flex xs12 sm6 md4 lg3 class="ma-2" v-for="team in loadedUserTeams" :key="team.slug">
+                        <v-card>
+                            <v-img :src="`/images/teams/${team.image}`" :aspect-ratio="1" class="pa-2" @click="deselectTeam(team)"></v-img>
+                        </v-card>
+                    </v-flex>
+                </v-layout>
+
+                <!-- <v-layout row wrap> -->
                 <!-- Confederations tabs -->
-                <!-- @change="changeConfederation(selectedConfederation.slug, active_confederation_tab)" -->
                 <v-tabs color="green" dark slider-color="yellow" fixed-tabs v-model="active_confederation_tab" @change="changeConfederation()">
                     <v-tab v-for="(confederation, index) in confederations" :key="index" ripple style="cursor: pointer;">
                         <v-img :src="`/images/confederations/${confederation.image}`" :aspect-ratio="1" :max-width="50"></v-img>
@@ -43,15 +59,16 @@
                     <v-tab v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index" ripple style="cursor: pointer;">
                         {{ competition.name }}
                     </v-tab>
+                    <!-- <v-tabs-items @change="abc()"> -->
                     <v-tab-item v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index">
                         <!-- <div v-for="team in loadedTeamsByCompetition" :key="team.slug">
-                    {{ team }}
-                </div> -->
+						{{ team }}
+					</div> -->
                         <!-- <v-container grid-list-xs10> -->
                         <v-layout row wrap align-center justify-center v-if="selectedCompetition">
                             <v-flex xs6 sm4 md3 class="text-xs-center" v-for="team in loadedTeamsByCompetition[selectedCompetition.slug]" :key="team.slug" style="border: 1px solid green;">
                                 <v-hover>
-                                    <v-card slot-scope="{ hover }" class="card ma-3 pt-2" :class="[loadedUserTeams[team.slug] ? 'abc' : `${hover ? 'hover' : null}`]" @click.stop="selectTeam(team)">
+                                    <v-card slot-scope="{ hover }" class="card ma-3 pt-2" :class="[loadedUserTeams && loadedUserTeams[team.slug] ? 'selected' : `${hover ? 'hover' : null}`]" @click.stop="selectTeam(team)">
                                         <!-- {{ team }} -->
                                         <v-img :src="`/images/teams/${team.image}`" :lazy-src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4"></v-img>
                                         <v-card-actions style="border: 1px solid red; width: 100%; height: 30px;" class="px-2 py-0 justify-center">
@@ -61,9 +78,9 @@
                                                 </v-flex>
                                                 <v-flex xs3 class="text-xs-right">
                                                     <v-layout align-center>
-														<img src="/images/icons/icon_48x48.png" width="20" />
+                                                        <img src="/images/icons/icon_48x48.png" width="20" />
                                                         <!-- <v-img src="/images/icons/icon_48x48.png" :max-width="40"></v-img> -->
-                                                        <span class="ml-2">20</span>
+                                                        <span class="ml-2">{{ team.usersCount }}</span>
                                                     </v-layout>
                                                 </v-flex>
                                             </v-layout>
@@ -71,40 +88,44 @@
                                     </v-card>
                                 </v-hover>
                                 <!-- <div class="flip-card">
-                            <v-card hover class="flip-card-inner" :class="[ isFlipped[index] ? 'flipped' : '' ]" @click="toggleFlip(index)" style="border: 1px solid red;">
-                                <div class="flip-card-front">
-                                    <h1>Front</h1> 
-                                </div>
-                                <div class="flip-card-back">
-                                    <h1>Back</h1> 
-                                    <v-btn @click.stop="selectCard">Select card</v-btn>
-                                </div>
-                            </v-card>
-                        </div> -->
+								<v-card hover class="flip-card-inner" :class="[ isFlipped[index] ? 'flipped' : '' ]" @click="toggleFlip(index)" style="border: 1px solid red;">
+									<div class="flip-card-front">
+										<h1>Front</h1> 
+									</div>
+									<div class="flip-card-back">
+										<h1>Back</h1> 
+										<v-btn @click.stop="selectCard">Select card</v-btn>
+									</div>
+								</v-card>
+							</div> -->
                             </v-flex>
                         </v-layout>
                         <!-- </v-container> -->
                     </v-tab-item>
+                    <!-- </v-tabs-items> -->
                 </v-tabs>
+                <!-- </v-layout> -->
             </v-container>
-        </v-content>
-    </v-app>
+        <!-- </v-content>
+    </v-app> -->
 </template>
 
 <script>
 	import Noty from 'noty'
+	import axios from 'axios'
 	export default {
+		layout: 'layoutFront',
 		async created() {
 			// await this.fetchCountriesByConfederation('uefa')
 			await this.changeConfederation()
-			if (this.$store.getters['userTeams/loadedUserTeams'].length < 1) {
-				console.log('fetchUserTeams')
-				try {
-					await this.$store.dispatch('userTeams/fetchUserTeams')
-				} catch (error) {
-					console.log('error from created: ', error)
-				}
+			// if (!this.$store.getters['userTeams/loadedUserTeams'] || this.$store.getters['userTeams/loadedUserTeams'].length < 1) {
+			console.log('fetchUserTeams')
+			try {
+				await this.$store.dispatch('userTeams/fetchUserTeams')
+			} catch (error) {
+				console.log('error from created: ', error)
 			}
+			// }
 		},
 		data() {
 			return {
@@ -134,7 +155,7 @@
 			loadedUser() {
 				return this.$store.getters['users/loadedUser']
 			},
-			loadedUserTeams () {
+			loadedUserTeams() {
 				return this.$store.getters['userTeams/loadedUserTeams']
 			},
 			confederations() {
@@ -294,7 +315,12 @@
 					this.selectedCountry.slug
 				][this.active_competition_tab]
 
-				if (!this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
+				if (
+					this.selectedCompetition
+					// 	this.selectedCompetition.slug &&
+					// 	this.loadedTeamsByCompetition[this.selectedCompetition.slug]
+					// 		.length < 1
+				) {
 					console.log('Call fetchTeamsByCompetition')
 					await this.fetchTeamsByCompetition(
 						this.selectedCompetition.slug
@@ -315,18 +341,24 @@
 						this.selectedConfederation.slug
 					][this.active_country_tab]
 					if (
-						!this.loadedCompetitionsByCountry[this.selectedCountry.slug]
+						this.selectedCountry
+						// this.selectedCountry.slug &&
+						// this.loadedCompetitionsByCountry[this.selectedCountry.slug]
+						// 	.length < 1
 					) {
 						await this.fetchCompetitionsByCountry(
 							this.selectedCountry.slug
 						)
-						// console.log('Done fetching competitions by country. Continue.')
-						// console.log('Go on!')
 					}
 					this.active_competition_tab = 0
 					this.selectedCompetition = this.loadedCompetitionsByCountry[
 						this.selectedCountry.slug
 					][this.active_competition_tab]
+					if (this.selectedCompetition) {
+						await this.fetchTeamsByCompetition(
+							this.selectedCompetition.slug
+						)
+					}
 				}
 			},
 			async changeCompetition() {
@@ -338,10 +370,10 @@
 					][this.active_competition_tab]
 					// console.log('this.selectedCompetition: ', this.selectedCompetition)
 					if (
-						this.selectedCompetition &&
-						!this.loadedTeamsByCompetition[
-							this.selectedCompetition.slug
-						]
+						this.selectedCompetition
+						// 	this.selectedCompetition.slug &&
+						// 	this.loadedTeamsByCompetition[this.selectedCompetition.slug]
+						// 		.length < 1
 					) {
 						await this.fetchTeamsByCompetition(
 							this.selectedCompetition.slug
@@ -378,7 +410,7 @@
 			},
 			async fetchTeamsByCompetition(competitionSlug) {
 				try {
-					// console.log('fetchTeamsByCompetition vue: ', competitionSlug)
+					console.log('fetchTeamsByCompetition vue: ', competitionSlug)
 					await this.$store.dispatch(
 						'teams/fetchTeamsByCompetition',
 						competitionSlug
@@ -391,7 +423,7 @@
 			async selectTeam(team) {
 				try {
 					console.log('selectTeam: ', team)
-					await this.$store.dispatch('userTeams/updateUserTeams', team)
+					await this.$store.dispatch('userTeams/selectUserTeam', team)
 					new Noty({
 						type: 'success',
 						text: `You now follow ${team.name} &#128522;`,
@@ -402,25 +434,50 @@
 					console.log('error: ', error)
 					new Noty({
 						type: 'error',
-						text: `Sorry, an error occured and you could not follow ${team.name} &#128533;`,
+						text: `Sorry, an error occured and you could not follow ${
+							team.name
+						} &#128533;`,
 						timeout: 5000,
 						theme: 'metroui'
 					}).show()
 				}
+			},
+			async deselectTeam(team) {
+				try {
+					console.log('deselectTeam: ', team)
+					await this.$store.dispatch('userTeams/deselectUserTeam', team)
+					new Noty({
+						type: 'success',
+						text: `You unfollow ${team.name}`,
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				} catch (error) {
+					console.log('error: ', error)
+					new Noty({
+						type: 'error',
+						text: `Sorry, an error occured and you could not unfollow ${
+							team.name
+						}`,
+						theme: 'metroui'
+					}).show()
+				}
+			},
+			async fetchCompetitions(year) {},
+			abc() {
+				console.log('Click on abc')
 			}
 		}
 	}
 </script>
 
 <style scoped>
-	.card:hover {
-		/* cursor: pointer; */
-	}
 	.hover {
 		border: 2px solid blue;
 		cursor: pointer;
 	}
-	.abc {
-		background: yellow;
+	.selected {
+		/* background: yellow; */
+		background: var(--v-primary-lighten4);
 	}
 </style>

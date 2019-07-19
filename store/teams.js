@@ -18,9 +18,13 @@ export const mutations = {
     setTeamsByCompetition(state, payload) {
         console.log('payload2: ', payload)
         // state.loadedTeams.payload.competition] = payload.teams
-        state.loadedTeamsByCompetition = Object.assign({}, state.loadedTeamsByCompetition, {
-            [payload.competition]: payload.teams
-        })
+        state.loadedTeamsByCompetition = Object.assign(
+            {},
+            state.loadedTeamsByCompetition,
+            {
+                [payload.competition]: payload.teams
+            }
+        )
     },
     setTeams(state, payload) {
         state.loadedTeams = payload
@@ -52,23 +56,31 @@ export const actions = {
     },
     // Fetch teams by country
     fetchTeamsByCompetition({ commit }, payload) {
-        return new Promise((resolve) => {
-            // console.log('payload: ', payload)
-            firebase.database().ref('/teams/').orderByChild(`competitions/${payload}`).equalTo(true).on('value', function(snapshot) {
-                const teamsArray = []
-                for (const key in snapshot.val()) {
-                    teamsArray.push({
-                        ...snapshot.val()[key],
-                        id: key
+        return new Promise(resolve => {
+            console.log('fetchTeamsByCompetition: ', payload)
+            firebase
+                .database()
+                .ref('/teams/')
+                .orderByChild(`competitions/${payload}`)
+                .equalTo(true)
+                .on('value', function(snapshot) {
+                    const teamsArray = []
+                    for (const key in snapshot.val()) {
+                        teamsArray.push({
+                            ...snapshot.val()[key],
+                            id: key
+                        })
+                    }
+                    // console.log('teamsArray2: ', teamsArray)
+                    const orderedTeams = teamsArray.sort(
+                        (a, b) => parseInt(a.usersCount) - parseInt(b.usersCount)
+                    )
+                    commit('setTeamsByCompetition', {
+                        competition: payload,
+                        teams: orderedTeams
                     })
-                }
-                // console.log('teamsArray2: ', teamsArray)
-                commit('setTeamsByCompetition', {
-                    competition: payload,
-                    teams: teamsArray
+                    resolve()
                 })
-                resolve()
-            })
         })
     },
     // Load all teams
