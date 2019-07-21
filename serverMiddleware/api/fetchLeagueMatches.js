@@ -47,7 +47,7 @@ module.exports = app.use(async function(req, res, next) {
         const competitionsArray = [];
         const competitions = await admin.database().ref('/competitions').once('value');
         competitions.forEach(competition => {
-            if (competition.val().status === 'active') {
+            if (competition.val().active === true) {
                 competitionsArray.push({
                     name: competition.val().name,
                     slug: competition.val().slug,
@@ -64,7 +64,7 @@ module.exports = app.use(async function(req, res, next) {
         let updates = {};
         const league_id = req.body.league_id;
         console.log('league_id: ', league_id);
-        const competition = competitionsArray.find(competition => competition.apifootball_id == league_id)
+        const competition = competitionsArray.find(competition => competition.apifootball_id == league_id);
 
         const response = await getLeagueMatches(league_id);
 

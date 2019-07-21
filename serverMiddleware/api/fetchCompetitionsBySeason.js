@@ -64,7 +64,7 @@ module.exports = app.use(async function(req, res) {
 			if (!newKey.includes('undefined')) {
 				const league = apiFootballData.find(competition => competition.name === name && competition.country === country && competition.season == season);
 				if (league) {
-					updates[`/competitions/${newKey}`] = {...snapshot.val()[key], active: '', apifootball_id: league.id};
+					updates[`/competitions/${newKey}`] = {...snapshot.val()[key], slug: newKey, active: false, apifootball_id: league.id};
 				}
 			}
 		}

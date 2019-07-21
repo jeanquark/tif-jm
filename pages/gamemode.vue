@@ -55,7 +55,7 @@
 
                 <!-- Competitions tabs -->
                 <!--  -->
-                <v-tabs color="orange" dark slider-color="yellow" fixed-tabs v-model="active_competition_tab" style="display: inline;" @change="changeCompetition()" v-if="selectedCountry">
+                <v-tabs :color="primary-lighten2" dark slider-color="yellow" fixed-tabs v-model="active_competition_tab" style="display: inline;" @change="changeCompetition()" v-if="selectedCountry">
                     <v-tab v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index" ripple style="cursor: pointer;">
                         {{ competition.name }}
                     </v-tab>

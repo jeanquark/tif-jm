@@ -151,11 +151,15 @@ module.exports = {
         //     handler: "~/serverMiddleware/api/fetchNextPremierLeagueMatches"
         // },
         {
-            path: "/api/fetch-league-matches", // POST request with { league_id = 2 } as body data
+            path: "/api/fetch-league-matches", // POST request with { league_id } as body data
             handler: "~/serverMiddleware/api/fetchLeagueMatches"
-        },
+		},
+		{
+			path: "/api/fetch-teams-for-all-active-competitions", // GET request to fetch all teams for active competitions
+			handler: "~/serverMiddleware/api/fetchTeamsForAllActiveCompetitions"
+		},
         {
-            path: "/api/fetch-next-matches", // POST request with { until = 15 } as body data
+            path: "/api/fetch-next-matches", // POST request with { until } as body data
             handler: "~/serverMiddleware/api/fetchNextMatches"
         },
         {
@@ -175,7 +179,7 @@ module.exports = {
             handler: "~/serverMiddleware/api/fetchEndingMatches"
 		},
 		{
-            path: "/api/fetch-competitions-by-season", // POST request with {season = 2019 } as body data
+            path: "/api/fetch-competitions-by-season", // POST request with {season } as body data
             handler: "~/serverMiddleware/api/fetchCompetitionsBySeason"
         },
         // {
