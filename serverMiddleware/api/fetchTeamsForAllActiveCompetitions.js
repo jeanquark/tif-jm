@@ -39,25 +39,26 @@ module.exports = app.use(async function(req, res, next) {
 		for (let competition of competitionsArray) {
 			console.log('competition: ', competition);
 			if (competition.apifootball_id) {
-				// const response = await getTeamsByLeague(competition.apifootball_id);
-				// Object.values(response.body.api.teams).forEach(team => {
-				// 	const id = team.team_id;
-				// 	const slug = slugify(team.name);
-				// 	const countrySlug = slugify(team.country);
-				// 	updates[`/teams/${slug}/apifootball_id`] = id;
-				// 	updates[`/teams/${slug}/apifootball_name`] = team.name;
-				// 	updates[`/teams/${slug}/slug`] = slug;
-				// 	updates[`/teams/${slug}/country/name`] = team.country;
-				// 	updates[`/teams/${slug}/country/slug`] = countrySlug;
-				// 	updates[`/teams/${slug}/founded`] = team.founded;
-				// 	updates[`/teams/${slug}/venue_name`] = team.venue_name;
-				// 	updates[`/teams/${slug}/venue_city`] = team.venue_city;
-				// 	updates[`/teams/${slug}/venue_capacity`] = team.venue_capacity;
-				// 	updates[`/teams/${slug}/venue_surface`] = team.venue_surface;
-				// 	updates[`/teams/${slug}/venue_address`] = team.venue_address;
-				// 	updates[`/teams/${slug}/competitions/${competition.slug}`] = true;
-				// 	updates[`/teams/${slug}/image`] = `${slug}.png`;
-				// })
+				const response = await getTeamsByLeague(competition.apifootball_id);
+				Object.values(response.body.api.teams).forEach(team => {
+					const id = team.team_id;
+					const slug = slugify(team.name);
+					const countrySlug = slugify(team.country);
+					updates[`/teams/${slug}/apifootball_id`] = id;
+					updates[`/teams/${slug}/apifootball_name`] = team.name || null;
+					updates[`/teams/${slug}/name`] = team.name || null;
+					updates[`/teams/${slug}/slug`] = slug || null;
+					updates[`/teams/${slug}/country/name`] = team.country || null;
+					updates[`/teams/${slug}/country/slug`] = countrySlug || null;
+					updates[`/teams/${slug}/founded`] = team.founded || null;
+					updates[`/teams/${slug}/venue_name`] = team.venue_name || null;
+					updates[`/teams/${slug}/venue_city`] = team.venue_city || null;
+					updates[`/teams/${slug}/venue_capacity`] = team.venue_capacity || null;
+					updates[`/teams/${slug}/venue_surface`] = team.venue_surface || null;
+					updates[`/teams/${slug}/venue_address`] = team.venue_address || null;
+					updates[`/teams/${slug}/competitions/${competition.slug}`] = true;
+					updates[`/teams/${slug}/image`] = `${slug}.png`;
+				})
 			}
 		}
 

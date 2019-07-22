@@ -64,24 +64,18 @@
 							    v-animate="{value: 'bounceInRight'}"
 							>How it works</h2>
 							
-							<v-layout>
-								<v-flex
-								    xs12
-								    sm6
-								    md4
-								>
-									<p>loadedUser: {{ loadedUser }}</p>
-									<!-- <v-card class="ma-3">
-										<v-card-title>
-										</v-card-title>
-
-										<v-card-text>
-
-										</v-card-text>
-
-										<v-card-actions>
-										</v-card-actions>
-									</v-card> -->
+							<v-layout justify-center align-center class="my-2">
+								<v-flex xs12>
+									<!-- <p>loadedUser: {{ loadedUser }}</p> -->
+									Ici on peut place des informations supplémentaire sur notre application.<br />
+									Par exemple:<br />
+									<ul>
+										<li>Nombre de joueurs</li>
+										<li>Nombre de sports</li>
+										<li>Nombre d'équipes</li>
+										<li>Règles du jeu</li>
+									</ul>
+									
 								</v-flex>
 							</v-layout>
 						</div>

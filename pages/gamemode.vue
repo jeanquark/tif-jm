@@ -17,94 +17,98 @@
                     <!-- active_competition_tab: {{ active_competition_tab }}<br /><br /> -->
                     <!-- selectedConfederation: {{ selectedConfederation }}<br /><br /> -->
                     <!-- selectedCountry: {{ selectedCountry }}<br /><br /> -->
-                    <!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
+                    selectedCompetition: {{ selectedCompetition }}<br /><br />
+					loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br />
                 </p>
                 <v-btn class="warning" @click.stop="logout">Logout</v-btn><br /><br /><br />
 
-                <nuxt-link to="/user/events">Events</nuxt-link>
-                <!-- <a href="/api/fetch-competitions">Fetch competitions</a> -->
+				<nuxt-link to="/">Back to homepage</nuxt-link><br />
+                <nuxt-link to="/user/events">Events</nuxt-link><br />
+				<nuxt-link to="/admin">Admin (restricted access)</nuxt-link><br />
+				<nuxt-link to="/admin/competitions/create">Create competition (restricted access)</nuxt-link><br />
 
                 <br /><br /><br /><br /><br />
-                <v-layout row wrap justify-center>
+                <v-layout row wrap justify-center class="mb-4">
                     <v-flex xs12 class="mb-2 text-xs-center">
                         <h2>Your teams</h2>
                     </v-flex>
                     <v-flex xs12 sm6 md4 lg3 class="ma-2" v-for="team in loadedUserTeams" :key="team.slug">
-                        <v-card>
-                            <v-img :src="`/images/teams/${team.image}`" :aspect-ratio="1" class="pa-2" @click="deselectTeam(team)"></v-img>
+                        <v-card class="ma-3 pt-2">
+                            <v-img :src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4 pa-2"></v-img>
+							<v-card-actions>
+								<v-layout row wrap justify-center align-center>
+									<v-flex xs12 class="text-xs-center">
+										{{ team.name }}
+									</v-flex>
+									<!-- <v-flex xs3 class="text-xs-right">
+										<v-layout align-center>
+											<img src="/images/icons/icon_48x48.png" width="20" />
+											<span class="ml-2">{{ team.usersCount || 0 }}</span>
+										</v-layout>
+									</v-flex> -->
+									<v-btn small color="primary" class="mt-2" @click.stop="deselectTeam(team)">Deselect</v-btn>
+									</v-layout>
+							</v-card-actions>
                         </v-card>
                     </v-flex>
                 </v-layout>
 
-                <!-- <v-layout row wrap> -->
-                <!-- Confederations tabs -->
-                <v-tabs color="green" dark slider-color="yellow" fixed-tabs v-model="active_confederation_tab" @change="changeConfederation()">
-                    <v-tab v-for="(confederation, index) in confederations" :key="index" ripple style="cursor: pointer;">
-                        <v-img :src="`/images/confederations/${confederation.image}`" :aspect-ratio="1" :max-width="50"></v-img>
-                        <!-- <img :src="`/images/confederations/${confederation.image}`" width="60px" /> -->
-                    </v-tab>
-                </v-tabs>
+                <v-layout row wrap>
+					<v-flex xs12>
+						<!-- Confederations tabs -->
+						<v-tabs color="yellow" dark slider-color="blue" fixed-tabs v-model="active_confederation_tab" @change="changeConfederation()">
+							<v-tab v-for="(confederation, index) in confederations" :key="index" ripple style="cursor: pointer;">
+								<v-img :src="`/images/confederations/${confederation.image}`" :aspect-ratio="1" :max-width="50"></v-img>
+								<!-- <img :src="`/images/confederations/${confederation.image}`" width="60px" /> -->
+							</v-tab>
+						</v-tabs>
 
-                <!-- Countries tabs -->
-                <!--  -->
-                <v-tabs color="blue" dark slider-color="yellow" fixed-tabs v-model="active_country_tab" style="display: inline;" @change="changeCountry()" v-if="selectedConfederation">
-                    <v-tab v-for="(country, index) in loadedCountriesByConfederation[selectedConfederation.slug]" :key="index" ripple style="cursor: pointer;">
-                        <img :src="`/images/countries/${country.image}`" width="40px" />
-                    </v-tab>
-                </v-tabs>
+						<!-- Countries tabs -->
+						<v-tabs color="amber" dark slider-color="blue" fixed-tabs v-model="active_country_tab" style="display: inline;" @change="changeCountry()" v-if="selectedConfederation">
+							<v-tab v-for="(country, index) in loadedCountriesByConfederation[selectedConfederation.slug]" :key="index" ripple style="cursor: pointer;">
+								<img :src="`/images/countries/${country.image}`" width="40px" />
+							</v-tab>
+						</v-tabs>
 
-                <!-- Competitions tabs -->
-                <!--  -->
-                <v-tabs :color="primary-lighten2" dark slider-color="yellow" fixed-tabs v-model="active_competition_tab" style="display: inline;" @change="changeCompetition()" v-if="selectedCountry">
-                    <v-tab v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index" ripple style="cursor: pointer;">
-                        {{ competition.name }}
-                    </v-tab>
-                    <!-- <v-tabs-items @change="abc()"> -->
-                    <v-tab-item v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index">
-                        <!-- <div v-for="team in loadedTeamsByCompetition" :key="team.slug">
-						{{ team }}
-					</div> -->
-                        <!-- <v-container grid-list-xs10> -->
-                        <v-layout row wrap align-center justify-center v-if="selectedCompetition">
-                            <v-flex xs6 sm4 md3 class="text-xs-center" v-for="team in loadedTeamsByCompetition[selectedCompetition.slug]" :key="team.slug" style="border: 1px solid green;">
-                                <v-hover>
-                                    <v-card slot-scope="{ hover }" class="card ma-3 pt-2" :class="[loadedUserTeams && loadedUserTeams[team.slug] ? 'selected' : `${hover ? 'hover' : null}`]" @click.stop="selectTeam(team)">
-                                        <!-- {{ team }} -->
-                                        <v-img :src="`/images/teams/${team.image}`" :lazy-src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4"></v-img>
-                                        <v-card-actions style="border: 1px solid red; width: 100%; height: 30px;" class="px-2 py-0 justify-center">
-                                            <v-layout row wrap align-center>
-                                                <v-flex xs9 class="text-xs-center">
-                                                    {{ team.name }}
-                                                </v-flex>
-                                                <v-flex xs3 class="text-xs-right">
-                                                    <v-layout align-center>
-                                                        <img src="/images/icons/icon_48x48.png" width="20" />
-                                                        <!-- <v-img src="/images/icons/icon_48x48.png" :max-width="40"></v-img> -->
-                                                        <span class="ml-2">{{ team.usersCount }}</span>
-                                                    </v-layout>
-                                                </v-flex>
-                                            </v-layout>
-                                        </v-card-actions>
-                                    </v-card>
-                                </v-hover>
-                                <!-- <div class="flip-card">
-								<v-card hover class="flip-card-inner" :class="[ isFlipped[index] ? 'flipped' : '' ]" @click="toggleFlip(index)" style="border: 1px solid red;">
-									<div class="flip-card-front">
-										<h1>Front</h1> 
-									</div>
-									<div class="flip-card-back">
-										<h1>Back</h1> 
-										<v-btn @click.stop="selectCard">Select card</v-btn>
-									</div>
-								</v-card>
-							</div> -->
-                            </v-flex>
-                        </v-layout>
-                        <!-- </v-container> -->
-                    </v-tab-item>
-                    <!-- </v-tabs-items> -->
-                </v-tabs>
-                <!-- </v-layout> -->
+						<!-- Competitions tabs -->
+						<v-tabs color="orange" dark slider-color="blue" fixed-tabs v-model="active_competition_tab" style="display: inline;" @change="changeCompetition()" v-if="selectedCountry && loadedCompetitionsByCountry[selectedCountry.slug] &&loadedCompetitionsByCountry[selectedCountry.slug].length > 0">
+							<v-tab v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index" ripple style="cursor: pointer;">
+								{{ competition.name }}
+							</v-tab>
+							<v-tab-item v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index">
+								<v-layout row wrap align-center justify-center v-if="selectedCompetition">
+									<v-flex xs6 sm4 md3 class="text-xs-center" v-for="team in loadedTeamsByCompetition[selectedCompetition.slug]" :key="team.slug" style="border: 1px solid green;">
+										<v-hover>
+											<v-card slot-scope="{ hover }" class="card ma-3 pt-2" :class="[loadedUserTeams && loadedUserTeams[team.slug] ? 'selected' : `${hover ? 'hover' : null}`]" @click.stop="selectTeam(team)">
+												<!-- {{ team }} -->
+												<v-img :src="`/images/teams/${team.image}`" :lazy-src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4"></v-img>
+												<v-card-actions style="border: 1px solid red; width: 100%; height: 30px;" class="px-2 py-0 justify-center">
+													<v-layout row wrap align-center>
+														<v-flex xs9 class="text-xs-center">
+															{{ team.name }}
+														</v-flex>
+														<v-flex xs3 class="text-xs-right">
+															<v-layout align-center>
+																<img src="/images/icons/icon_48x48.png" width="20" />
+																<!-- <v-img src="/images/icons/icon_48x48.png" :max-width="40"></v-img> -->
+																<span class="ml-2">{{ team.usersCount || 0 }}</span>
+															</v-layout>
+														</v-flex>
+													</v-layout>
+												</v-card-actions>
+											</v-card>
+										</v-hover>
+									</v-flex>
+								</v-layout>
+							</v-tab-item>
+						</v-tabs>
+						<v-tabs color="orange" slider-color="orange" class="justify-center" v-else>
+							<v-layout justify-center align-center class="white--text">
+								Sorry, no competition found for this country
+							</v-layout>
+						</v-tabs>
+					</v-flex>
+                </v-layout>
             </v-container>
         <!-- </v-content>
     </v-app> -->
@@ -135,20 +139,6 @@
 				selectedConfederation: {},
 				selectedCountry: {},
 				selectedCompetition: {}
-				// selectedConfederation: {
-				//     name: 'UEFA',
-				//     slug: 'uefa'
-				// },
-				// selectedCountry: {
-				// 	name: 'Spain',
-				// 	slug: 'spain'
-				// },
-				// selectedCompetition: {
-				//     name: 'La Liga',
-				//     slug: 'spanish_la_liga_2018_2019'
-				// },
-				// abc: 'uefa',
-				// isFlipped: new Array(30)
 			}
 		},
 		computed: {
@@ -167,7 +157,7 @@
 							name: 'Europe',
 							slug: 'europe'
 						},
-						image: 'europe2.png'
+						image: 'europe.png'
 					},
 					{
 						name: 'CONCACAF',
@@ -176,7 +166,7 @@
 							name: 'America',
 							slug: 'america'
 						},
-						image: 'north_and_central_america2.png'
+						image: 'north_and_central_america.png'
 					},
 					{
 						name: 'CONMEBOL',
@@ -185,7 +175,7 @@
 							name: 'America',
 							slug: 'america'
 						},
-						image: 'south_america2.png'
+						image: 'south_america.png'
 					},
 					{
 						name: 'CAF',
@@ -194,7 +184,7 @@
 							name: 'Africa',
 							slug: 'africa'
 						},
-						image: 'africa2.png'
+						image: 'africa.png'
 					},
 					{
 						name: 'AFC',
@@ -203,7 +193,7 @@
 							name: 'Asia',
 							slug: 'asia'
 						},
-						image: 'asia2.png'
+						image: 'asia.png'
 					},
 					{
 						name: 'OFC',
@@ -212,7 +202,7 @@
 							name: 'Oceania',
 							slug: 'oceania'
 						},
-						image: 'oceania2.png'
+						image: 'oceania.png'
 					}
 				]
 			},
@@ -448,7 +438,7 @@
 					await this.$store.dispatch('userTeams/deselectUserTeam', team)
 					new Noty({
 						type: 'success',
-						text: `You unfollow ${team.name}`,
+						text: `You successfully unfollow ${team.name} &#128546;`,
 						timeout: 5000,
 						theme: 'metroui'
 					}).show()
@@ -479,5 +469,8 @@
 	.selected {
 		/* background: yellow; */
 		background: var(--v-primary-lighten4);
+	}
+	.def {
+		background-color: orange;
 	}
 </style>

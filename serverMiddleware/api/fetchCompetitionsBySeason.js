@@ -1,9 +1,9 @@
-const express = require("express"),
-      moment = require("moment"),
-      admin = require("firebase-admin"),
+const express = require('express'),
+      moment = require('moment'),
+      admin = require('firebase-admin'),
       bodyParser = require('body-parser'),
 	  slugify = require('../../helpers/slugify.js'),
-      unirest = require("unirest");
+      unirest = require('unirest');
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
@@ -34,24 +34,22 @@ module.exports = app.use(async function(req, res) {
 		const season = req.body.season;
 		console.log('season: ', season);
 		
-		// const competitionName = slugify('Swiss Super League');
-		// console.log('slugify.slugify("Swiss Super League"): ', slugify('Swiss Super League'));
-		// console.log('competitionName: ', competitionName);
-		// const competitionName2 = slugifyFunction.slugify('');
 
 		// 1) Make external request to APIFootball to retrieve all competitions of a given season and push them to an array
 		const apiFootballData = []
-		const response = await getCompetitionsBySeason(season);
-		Object.values(response.body.api.leagues).forEach(league => {
-			apiFootballData.push({ 
-				id: league.league_id,
-				name: league.name,
-				country: league.country,
-				season: league.season,
-				seasonStart: league.season_start,
-				seasonEnd: league.season_end
-			})
-		});
+		if (season) {
+			const response = await getCompetitionsBySeason(season);
+			Object.values(response.body.api.leagues).forEach(league => {
+				apiFootballData.push({ 
+					id: league.league_id,
+					name: league.name,
+					country: league.country,
+					season: league.season,
+					seasonStart: league.season_start,
+					seasonEnd: league.season_end
+				})
+			});
+		}
 
         // 2) Duplicate all current competitions and update apifootball_id value when found
 		let updates = {};
@@ -64,16 +62,23 @@ module.exports = app.use(async function(req, res) {
 			if (!newKey.includes('undefined')) {
 				const league = apiFootballData.find(competition => competition.name === name && competition.country === country && competition.season == season);
 				if (league) {
-					updates[`/competitions/${newKey}`] = {...snapshot.val()[key], slug: newKey, active: false, apifootball_id: league.id};
+					updates[`/competitions/${newKey}`] = {
+						...snapshot.val()[key],
+						slug: newKey,
+						apifootball_id: league.id,
+						season: league.season,
+						seasonStart: league.season_start,
+						seasonEnd: league.season_end
+					};
 				}
 			}
 		}
 		await admin.database().ref().update(updates);
 
-        res.send(`POST request to API-Football to fetch league ${season} matches succeeded!`);
+        res.send(`POST request to API-Football to fetch competitions by season ${season} succeeded!`);
         
     } catch (error) {
         console.log("APIFootball error: ", error);
-        res.end(`POST request to API-Football to fetch league ${season} matches failed: ${error}`);
+        res.end(`POST request to API-Football to fetch competitions by season ${season} failed: ${error}`);
     }
 });

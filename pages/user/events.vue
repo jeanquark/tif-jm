@@ -2,6 +2,7 @@
     <!-- <v-app>
         <v-content> -->
             <v-container>
+				<nuxt-link to="/gamemode">Back to gamemode</nuxt-link><br />
                 <h2>User events</h2>
                 <v-layout row wrap>
                     <v-flex xs12>
@@ -9,9 +10,11 @@
 						loadedUserTeams: {{ loadedUserTeams }}<br /><br />
 						loadedUserEvents: {{ loadedUserEvents }}<br /><br />
                     </v-flex>
-					<v-flex v-for="event in loadedEventsByDay['2019-07-20']" :key="event.slug">
-						{{ event.homeTeam_name }} - 
-						{{ event.visitorTeam_name }}
+					<v-flex v-for="event in loadedEventsByDay[day]" :key="event.slug">
+						<nuxt-link :to="`/event/${event.id}`">
+							{{ event.homeTeam_name }} - 
+							{{ event.visitorTeam_name }}
+						</nuxt-link>
 					</v-flex>
                 </v-layout>
             </v-container>
@@ -24,7 +27,7 @@
 	export default {
 		layout: 'layoutFront',
 		created() {
-			this.day = moment().add(1, 'days').format('YYYY-MM-DD')
+			this.day = moment().add(5, 'days').format('YYYY-MM-DD')
 			this.$store.dispatch('events/fetchEventsByDay', this.day)
 		},
 		data() {
@@ -44,7 +47,7 @@
 				this.loadedUserTeams.forEach(team => {
 					// userEvents.push(team)
 					console.log('team: ', team)
-					const teamEvent = this.$store.getters['events/loadedEventsByDay']['2019-07-20'].filter(event => event.homeTeam_slug === team.slug || event.visitorTeam_slug === team.slug)
+					const teamEvent = this.$store.getters['events/loadedEventsByDay'][this.day] ? this.$store.getters['events/loadedEventsByDay'][this.day].filter(event => event.homeTeam_slug === team.slug || event.visitorTeam_slug === team.slug) : []
 					console.log('teamEvent: ', teamEvent)
 					if (teamEvent.length > 0) {
 						userEvents.push(teamEvent)
