@@ -85,7 +85,7 @@ module.exports = app.use(async function(req, res, next) {
                         console.log('No homeTeamData!');
                         homeTeam_slug = slugify(match.homeTeam.team_name);
                     } else {
-                        homeTeam_slug = homeTeamData.slug;
+                        homeTeam_slug = homeTeamData.apifootball_slug;
                     }
 
                     const visitorTeamData = teamsArray.find(team => parseInt(team.apifootball_id) === parseInt(match.awayTeam.team_id));
@@ -94,12 +94,12 @@ module.exports = app.use(async function(req, res, next) {
                         console.log('No visitorTeamData!')
                         awayTeam_slug = slugify(match.awayTeam.team_name);
                     } else {
-                        awayTeam_slug = visitorTeamData.slug;
+                        awayTeam_slug = visitorTeamData.apifootball_slug;
                     }
 
                     const id = match.fixture_id;
                     const roundShort = match.round.substring(match.round.lastIndexOf('-') + 2);
-                    updates[`/events/${id}/id`] = id;
+                    // updates[`/events/${id}/id`] = id;
 					updates[`/events/${id}/date_iso8601`] = match.event_date;
 					updates[`/events/${id}/date`] = moment(match.event_date).format('YYYY-MM-DD');
 					updates[`/events/${id}/time`] = moment(match.event_date).format('HH:mm');
@@ -111,6 +111,7 @@ module.exports = app.use(async function(req, res, next) {
 					updates[`/events/${id}/homeTeam_id`] = match.homeTeam.team_id;
 					updates[`/events/${id}/homeTeam_name`] = match.homeTeam.team_name;
 					updates[`/events/${id}/homeTeam_slug`] = homeTeam_slug;
+					// updates[`/events/${id}/homeTeam_slug`] = match.homeTeam.team_slug;
 					updates[`/events/${id}/homeTeam_score`] = match.goalsHomeTeam;
 					updates[`/events/${id}/visitorTeam_id`] = match.awayTeam.team_id;
 					updates[`/events/${id}/visitorTeam_name`] = match.awayTeam.team_name;

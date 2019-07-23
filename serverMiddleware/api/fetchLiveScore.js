@@ -49,14 +49,16 @@ module.exports = app.use(async function(req, res, next) {
             if (competitionsArray.find(competition => competition.apifootball_id == match.league_id)) {
                 console.log('match: ', match);
                 const id = match.fixture_id;
-                updates[`/events_new3/${id}/status`] = match.status;
-                updates[`/events_new3/${id}/statusShort`] = match.statusShort;
-                updates[`/events_new3/${id}/goalsHomeTeam`] = match.goalsHomeTeam;
-                updates[`/events_new3/${id}/goalsVisitorTeam`] = match.goalsAwayTeam;
-                updates[`/events_new3/${id}/halftime_score`] = match.halftime_score;
-                updates[`/events_new3/${id}/final_score`] = match.final_score;
-                updates[`/events_new3/${id}/penalty`] = match.penalty;
-                updates[`/events_new3/${id}/elapsed`] = match.elapsed;
+                updates[`/events/${id}/status`] = match.status;
+                updates[`/events/${id}/statusShort`] = match.statusShort;
+                // updates[`/events/${id}/goalsHomeTeam`] = match.goalsHomeTeam;
+                updates[`/events/${id}/homeTeam_goals`] = match.goalsHomeTeam;
+                // updates[`/events/${id}/goalsVisitorTeam`] = match.goalsAwayTeam;
+                updates[`/events/${id}/visitorTeam_goals`] = match.goalsAwayTeam;
+                updates[`/events/${id}/halftime_score`] = match.halftime_score;
+                updates[`/events/${id}/final_score`] = match.final_score;
+                updates[`/events/${id}/penalty`] = match.penalty;
+                updates[`/events/${id}/elapsed`] = match.elapsed;
             }
         }
 

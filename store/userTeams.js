@@ -17,8 +17,8 @@ export const mutations = {
 export const actions = {
     fetchUserTeams({ commit, rootGetters }) {
         return new Promise((resolve, reject) => {
-            const userId = rootGetters['users/loadedUser'].id
-            try {
+			try {
+				const userId = rootGetters['users/loadedUser'].id
                 firebase
                     .database()
                     .ref(`userTeams/${userId}`)
