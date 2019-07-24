@@ -2,10 +2,11 @@ import * as firebase from 'firebase/app'
 import 'firebase/database'
 import Noty from 'noty'
 import axios from 'axios'
+import slugify from '../helpers/slugify2.js'
 
 export const state = () => ({
-	loadedCompetitions: [],
-	loadedCompetitionsByCountry: []
+    loadedCompetitions: [],
+    loadedCompetitionsByCountry: []
 })
 
 export const mutations = {
@@ -35,26 +36,33 @@ export const mutations = {
 
 export const actions = {
     fetchCompetitionsByCountry({ commit }, payload) {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             console.log('fetchCompetitionsByCountry store: ', payload)
-            firebase.database().ref('/competitions').orderByChild(`countries/${payload}/slug`).equalTo(payload).on('value', function(snapshot) {
-                const competitionsArray = []
-                for (const key in snapshot.val()) {
-					if (snapshot.val()[key].active === true) {
-						competitionsArray.push({
-							...snapshot.val()[key],
-							id: key
-						})
-					}
-                }
-                console.log('competitionsArray: ', competitionsArray)
-				const orderedCompetitions = competitionsArray.sort((a, b) => a.ranking_country - b.ranking_country)
-                commit('setCompetitionsByCountry', {
-                    country: payload,
-                    competitions: orderedCompetitions
+            firebase
+                .database()
+                .ref('/competitions')
+                .orderByChild(`countries/${payload}/slug`)
+                .equalTo(payload)
+                .on('value', function(snapshot) {
+                    const competitionsArray = []
+                    for (const key in snapshot.val()) {
+                        if (snapshot.val()[key].active === true) {
+                            competitionsArray.push({
+                                ...snapshot.val()[key],
+                                id: key
+                            })
+                        }
+                    }
+                    console.log('competitionsArray: ', competitionsArray)
+                    const orderedCompetitions = competitionsArray.sort(
+                        (a, b) => a.ranking_country - b.ranking_country
+                    )
+                    commit('setCompetitionsByCountry', {
+                        country: payload,
+                        competitions: orderedCompetitions
+                    })
+                    resolve()
                 })
-                resolve()
-            })
         })
     },
     // Load all competitions
@@ -80,50 +88,49 @@ export const actions = {
     },
 
     // Create a new competition
-    createCompetition({ commit, getters }, payload) {
-        // commit('setLoading', true, { root: true })
-        console.log(payload)
+    async createCompetition({ commit, getters }, payload) {
+        try {
+			// commit('setLoading', true, { root: true })
+			console.log('payload: ', payload)
 
-        // Define key from competition slug
-        const newCompetitionKey = payload.slug
+			// Define key from competition slug
+			const newCompetitionKey = slugify(payload.country) + '_' + slugify(payload.name) + '_' + parseInt(payload.season) + '_' + (parseInt(payload.season) + 1)
+			console.log('newCompetitionKey: ', newCompetitionKey)
 
-        let updates = {}
-        // Update competition node for each team that is part of the competition
-        for (let team in payload.teams) {
-            updates[
-                '/teams/' + team + '/competitions/' + newCompetitionKey
-            ] = true
-        }
-        // Update competitions node
-        updates['/competitions/' + newCompetitionKey] = payload
+			const newCompetition = {
+				active: false,
+				activity: {
+					name: 'Sport',
+					slug: 'sport'
+				},
+				category: {
+					name: 'Football',
+					slug: 'football'
+				},
+				apifootball_id: payload.league_id,
+				apifootball_country: payload.country,
+				apifootball_name: payload.name,
+				apifootball_season: payload.season,
+				season_start: payload.season_start,
+				season_end: payload.season_end
+			}
 
-        firebase
-            .database()
-            .ref()
-            .update(updates)
-            .then(() => {
-                commit('setLoading', false, { root: true })
-                new Noty({
-                    type: 'success',
-                    text:
-                        'Competition ' +
-                        payload.name +
-                        ' enregistrée avec succès!',
-                    timeout: 5000,
-                    theme: 'metroui'
-                }).show()
-            })
-            .catch(error => {
-                console.log(error)
-                commit('setError', error, { root: true })
-                commit('setLoading', false, { root: true })
-                new Noty({
-                    type: 'error',
-                    text: 'Competition non enregistrée. Erreur: ' + error,
-                    timeout: 5000,
-                    theme: 'metroui'
-                }).show()
-            })
+			let updates = {}
+			// Update competition node for each team that is part of the competition
+			// for (let team in payload.teams) {
+			// 	updates['/teams/' + team + '/competitions/' + newCompetitionKey] = true
+			// }
+			// Update competitions node
+			updates[`/competitions/${newCompetitionKey}`] = newCompetition
+
+			await firebase
+				.database()
+				.ref()
+				.update(updates)
+		} catch (error) {
+			console.log('error: ', error)
+			throw error
+		}
     },
 
     // Update a competition
@@ -175,9 +182,7 @@ export const actions = {
         // Delete competition for each team that is part of the competition in teams node
         for (let team of teams) {
             if (team.competitions[competitionId]) {
-                updates[
-                    '/teams/' + team.slug + '/competitions/' + competitionId
-                ] = null
+                updates['/teams/' + team.slug + '/competitions/' + competitionId] = null
             }
         }
         // Delete competition in competitions node
@@ -208,16 +213,14 @@ export const actions = {
                         if (response.data) {
                             new Noty({
                                 type: 'success',
-                                text:
-                                    'Image de la competition supprimée avec succès!',
+                                text: 'Image de la competition supprimée avec succès!',
                                 timeout: 5000,
                                 theme: 'metroui'
                             }).show()
                         } else {
                             new Noty({
                                 type: 'warning',
-                                text:
-                                    "Aucune image de la competition n'a été supprimée!",
+                                text: "Aucune image de la competition n'a été supprimée!",
                                 timeout: 5000,
                                 theme: 'metroui'
                             }).show()
@@ -229,8 +232,7 @@ export const actions = {
                         commit('setLoading', false, { root: true })
                         new Noty({
                             type: 'error',
-                            text:
-                                "L'image de la competition n'a pas pu être supprimée!",
+                            text: "L'image de la competition n'a pas pu être supprimée!",
                             timeout: 5000,
                             theme: 'metroui'
                         }).show()
@@ -241,9 +243,7 @@ export const actions = {
                 commit('setLoading', false, { root: true })
                 new Noty({
                     type: 'error',
-                    text:
-                        'Erreur lors de la suppression de la compétition. ' +
-                        error,
+                    text: 'Erreur lors de la suppression de la compétition. ' + error,
                     timeout: 5000,
                     theme: 'metroui'
                 }).show()
@@ -254,8 +254,8 @@ export const actions = {
 export const getters = {
     loadedCompetitions(state) {
         return state.loadedCompetitions
-	},
-	loadedCompetitionsByCountry (state) {
-		return state.loadedCompetitionsByCountry
-	}
+    },
+    loadedCompetitionsByCountry(state) {
+        return state.loadedCompetitionsByCountry
+    }
 }

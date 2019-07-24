@@ -32,16 +32,21 @@ export const actions = {
 			})
 		})
 	},
-	// Load all countries
-	loadedCountries ({commit}) {
-    	firebase.database().ref('/countries/').once('value').then(function (snapshot) {
-	      	// console.log(snapshot.val())
-	      	const countriesArray = []
-	      	for (const key in snapshot.val()) {
-	        	countriesArray.push({ ...snapshot.val()[key], id: key})
-	      	}
-	      	commit('setLoadedCountries', countriesArray)
-	    })
+	// fetch all countries
+	fetchCountries ({commit}) {
+    	try {
+			firebase.database().ref('/countries/').once('value').then(function (snapshot) {
+				// console.log(snapshot.val())
+				const countriesArray = []
+				for (const key in snapshot.val()) {
+					countriesArray.push({ ...snapshot.val()[key], id: key})
+				}
+				commit('setLoadedCountries', countriesArray)
+			})
+		} catch (error) {
+			console.log('error: ', error)
+			throw error
+		}
   	}
 }
 

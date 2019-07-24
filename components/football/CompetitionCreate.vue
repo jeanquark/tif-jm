@@ -9,6 +9,7 @@
 		selectedTeams: {{ this.selectedTeams }}<br /><br /> -->
         <!-- loadedTeams: {{ this.loadedTeams }}<br /><br /> -->
 		<!-- apiFootballKey: {{ apiFootballKey }}<br /><br /> -->
+		<!-- loadedCountries: {{ loadedCountries }}<br /><br /> -->
 		loadedCompetitions: {{ loadedCompetitions }}<br /><br />
 		selectedCompetition: {{ selectedCompetition }}<br /><br />
 		<v-card-title class="primary-title">
@@ -19,10 +20,10 @@
 		<v-container>
 			<v-layout row wrap>
 				<v-flex xs12 sm6 offset-sm3>
-					<v-autocomplete :items="loadedCountries" label="Sélectionner un pays" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedCountry"></v-autocomplete>
+					<v-autocomplete :items="loadedCountries" label="Sélectionner un pays" item-text="name" item-value="apifootball_name" single-line :return-object="true" v-model="selectedCountry"></v-autocomplete>
 				</v-flex>
 				<v-flex xs12 sm6 offset-sm3>
-					<v-autocomplete :items="loadedSeasons" label="Sélectionner une saison" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedSeason" @change="fetchCompetitionsByCountryAndSeason"></v-autocomplete>
+					<v-autocomplete :items="loadedSeasons" label="Sélectionner l'année du début de la saison" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedSeason" @change="fetchCompetitionsByCountryAndSeason"></v-autocomplete>
 				</v-flex>
 				<!-- <v-flex xs12 class="text-xs-center">
 					<v-btn color="primary" @click.stop="fetchCompetitionsByCountryAndSeason">Get competitions</v-btn>
@@ -58,6 +59,11 @@
 		layout: 'layoutBack',
 		props: ['activity', 'category'],
 		created() {
+			try {
+				this.$store.dispatch('countries/fetchCountries')
+			} catch (error) {
+				console.log('error: ', error)
+			}
 		},
 		mounted() {
 			console.log('moment: ', moment().add('-1', 'year').format('YYYY'))
@@ -107,7 +113,7 @@
 		methods: {
 			async fetchCompetitionsByCountryAndSeason () {
 				console.log('fetchCompetitionsByCountry', this.selectedCountry)
-				const fetchedCompetitions = await axios.get(`https://api-football-v1.p.rapidapi.com/v2/leagues/country/${this.selectedCountry.slug}/${this.selectedSeason}`, {
+				const fetchedCompetitions = await axios.get(`https://api-football-v1.p.rapidapi.com/v2/leagues/country/${this.selectedCountry.apifootball_name}/${this.selectedSeason}`, {
  					headers: {
 						'Accept': 'application/json',
 					   	'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
@@ -117,7 +123,24 @@
 				this.loadedCompetitions = fetchedCompetitions.data.api.leagues
 			},
 			async addCompetition () {
-				console.log('addCompetition: ', this.selectedCompetition)
+				try {
+					console.log('addCompetition: ', this.selectedCompetition)
+					await this.$store.dispatch('competitions/createCompetition', this.selectedCompetition)
+					new Noty({
+						type: 'success',
+						text: 'Compétition crée avec succès.',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				} catch (error) {
+					console.log('error: ', error)
+					new Noty({
+						type: 'error',
+						text: 'Une erreur est survenue et la compétition n\'a pas pu être créee.',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				}
 			}
 		},
 		watch: {

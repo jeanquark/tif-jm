@@ -1,7 +1,8 @@
 <template>
     <div>
         <v-app v-if="loadingPage">
-            <main>
+			<div class="loader"></div>
+            <!-- <main>
                 <v-container fill-height>
                     <v-layout align-center justify-center>
                         <v-container fill-height>
@@ -11,7 +12,7 @@
                         </v-container>
                     </v-layout>
                 </v-container>
-            </main>
+            </main> -->
         </v-app>
         <v-app v-else>
             <v-navigation-drawer fixed :clipped="$vuetify.breakpoint.lgAndUp" app v-model="drawer">
@@ -207,5 +208,22 @@
 </script>
 
 <style scoped>
+	.loader {
+		position: fixed;
+		border: 16px solid orangered;
+	    border-top: 16px solid #fff;
+	    border-radius: 50%;
+		width: 120px;
+	    height: 120px;
+		top: 50%;
+		left: 50%;
+		margin-top: -60px;
+		margin-left: -60px;
+	    animation: spin .5s linear infinite;
+	}
+	@keyframes spin {
+	    0% { transform: rotate(0deg); }
+	    100% { transform: rotate(360deg); }
+	}
 </style>
 

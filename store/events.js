@@ -3,25 +3,25 @@ import 'firebase/database'
 import Noty from 'noty'
 import axios from 'axios'
 import moment from 'moment'
-import { resolveObject } from 'url';
+import { resolveObject } from 'url'
 
 export const state = () => ({
-	loadedEvent: {},
+    loadedEvent: {},
     loadedEventsByDay: {},
-	loadedEventsByCompetitionByRound: {},
-	// loadedEventUsers: []
+    loadedEventsByCompetitionByRound: {},
+    loadedEventActionsUserNotification: {}
 })
 
 export const mutations = {
     setEmptyEvents(state) {
         state.loadedEvents = []
-	},
-	setEvent (state, payload) {
-		state.loadedEvent = payload
-	},
+    },
+    setEvent(state, payload) {
+        state.loadedEvent = payload
+    },
     setEventsByDay(state, payload) {
-		console.log('Call to setEventsByDay mutation', payload)
-		state.loadedEventsByDay = payload
+        console.log('Call to setEventsByDay mutation', payload)
+        state.loadedEventsByDay = payload
         // state.loadedEventsByDay = Object.assign({}, state.loadedEventsByDay, {
         //     [payload.date]: payload
         // })
@@ -33,45 +33,47 @@ export const mutations = {
         console.log('competition: ', competition)
         const round = payload.round
         console.log('round: ', round)
-        state.eventsByCompetitionByRound = Object.assign(
-            {},
-            state.eventsByCompetitionByRound,
-            {
-                [competition]: Object.assign(
-                    {},
-                    state.eventsByCompetitionByRound[competition],
-                    { [round]: payload.eventsArray }
-                )
-            }
-        )
+        state.eventsByCompetitionByRound = Object.assign({}, state.eventsByCompetitionByRound, {
+            [competition]: Object.assign({}, state.eventsByCompetitionByRound[competition], {
+                [round]: payload.eventsArray
+            })
+        })
     },
     // setEventUsers(state, payload) {
-	// 	state.loadedEventUsers = payload
+    // 	state.loadedEventUsers = payload
+    // },
+    // addEventUser(state, payload) {
+    // 	state.loadedEventUsers.push(...payload)
 	// },
-	// addEventUser(state, payload) {
-	// 	state.loadedEventUsers.push(...payload)
-	// },
+	setEventActionsUserNotification (state, payload) {
+		console.log('payload2: ', payload)
+		state.loadedEventActionsUserNotification = payload
+	},
     clearEvents(state) {
         state.loadedEvents = {}
-	},
+    }
 }
 
 export const actions = {
-	async fetchEvent({ commit }, payload) {
-		console.log('fetchEvent: ', payload)
-		return new Promise((resolve, reject) => {
-			try {
-				firebase.database().ref('/events').child(payload).on('value', function(snapshot) {
-					const event = {...snapshot.val(), id: snapshot.key}
-					commit('setEvent', event)
-					resolve()
-				})
-			} catch(error) {
-				console.log('error: ', error)
-				reject(error)
-			}
-		})
-	},
+    async fetchEvent({ commit }, payload) {
+        console.log('fetchEvent: ', payload)
+        return new Promise((resolve, reject) => {
+            try {
+                firebase
+                    .database()
+                    .ref('/events')
+                    .child(payload)
+                    .on('value', function(snapshot) {
+                        const event = { ...snapshot.val(), id: snapshot.key }
+                        commit('setEvent', event)
+                        resolve()
+                    })
+            } catch (error) {
+                console.log('error: ', error)
+                reject(error)
+            }
+        })
+    },
     async loadedEvents({ commit }) {
         return new Promise((resolve, reject) => {
             try {
@@ -105,30 +107,28 @@ export const actions = {
     },
     fetchEventsByDay({ commit }, payload) {
         try {
-			const date = payload
-			firebase
-				.database()
-				.ref('/events/')
-				.orderByChild('date')
-				.equalTo(date)
-				.on('value', function(snapshot) {
-					const eventsArray = []
-					snapshot.forEach(event => {
-						eventsArray.push({ ...event.val(), id: event.key })
-					})
-					const sortedEventsArray = eventsArray.sort(
-						(a, b) => a.timestamp - b.timestamp
-					)
-					// const events = { date: date, events: sortedEventsArray }
-					const events = { [date]: sortedEventsArray }
-					commit('setEventsByDay', events)
-				})
-			} catch (error) {
-				console.log('error: ', error)
-				throw error
-			}
+            console.log('fetchEventsByDay: ', payload)
+            firebase
+                .database()
+                .ref('/events/')
+                .orderByChild('date')
+                .equalTo(payload)
+                .on('value', function(snapshot) {
+                    const eventsArray = []
+                    snapshot.forEach(event => {
+                        eventsArray.push({ ...event.val(), id: event.key })
+                    })
+                    const sortedEventsArray = eventsArray.sort((a, b) => a.timestamp - b.timestamp)
+                    // const events = { date: date, events: sortedEventsArray }
+                    const events = { [payload]: sortedEventsArray }
+                    commit('setEventsByDay', events)
+                })
+        } catch (error) {
+            console.log('error: ', error)
+            throw error
+        }
     },
-    
+
     loadedCompetitionEvents({ commit }, payload) {
         // console.log('payload: ', payload)
         const competitionId = parseInt(payload.livescore_api_id)
@@ -209,75 +209,151 @@ export const actions = {
             commit('setLoading', false, { root: true })
             return error
         }
-	},
-	// fetchEventUsers({ commit }, payload) {
+    },
+    // fetchEventUsers({ commit }, payload) {
     //     return new Promise((resolve, reject) => {
-	// 		try {
-	// 			console.log('fetchEventUsers: ', payload)
-	// 			firebase
-	// 				.database()
-	// 				.ref('/eventUsers/')
-	// 				.child(payload)
-	// 				.on('value', function(snapshot) {
-	// 					const eventUsersArray = []
-	// 					for (const key in snapshot.val()) {
-	// 						eventUsersArray.push({ ...snapshot.val()[key] })
-	// 					}
-	// 					console.log('eventUsersArray: ', eventUsersArray)
-	// 					commit('setEventUsers', eventUsersArray)
-	// 					resolve()
-	// 				})
-			
-	// 		} catch (error) {
-	// 			reject(error)
-	// 		}
+    // 		try {
+    // 			console.log('fetchEventUsers: ', payload)
+    // 			firebase
+    // 				.database()
+    // 				.ref('/eventUsers/')
+    // 				.child(payload)
+    // 				.on('value', function(snapshot) {
+    // 					const eventUsersArray = []
+    // 					for (const key in snapshot.val()) {
+    // 						eventUsersArray.push({ ...snapshot.val()[key] })
+    // 					}
+    // 					console.log('eventUsersArray: ', eventUsersArray)
+    // 					commit('setEventUsers', eventUsersArray)
+    // 					resolve()
+    // 				})
+
+    // 		} catch (error) {
+    // 			reject(error)
+    // 		}
     //     })
-	// },
-	addUserToEvent({ commit, rootGetters }, payload) {
-		try {
-			console.log('addUserToEvent: ', payload)
-			const user = rootGetters['users/loadedUser']
-			console.log('user: ', user)
-			firebase
-				.database()
-				.ref(`/events/${payload}/users`)
-				.child(user.id)
-				.set({
-					id: user.id,
-					username: user.username || null,
-					picture: user.picture || null,
-					level: user.level ? user.level.value : ''
+    // },
+    addUserToEvent({ commit, rootGetters }, payload) {
+        try {
+            console.log('addUserToEvent: ', payload)
+            const user = rootGetters['users/loadedUser']
+            console.log('user: ', user)
+            firebase
+                .database()
+                .ref(`/events/${payload}/users`)
+                .child(user.id)
+                .set({
+                    id: user.id,
+                    username: user.username || null,
+                    picture: user.picture || null,
+                    level: user.level ? user.level.value : ''
+                })
+        } catch (error) {
+            console.log('error: ', error)
+            throw error
+        }
+    },
+    async addActionToEvent({ commit, rootGetters }, payload) {
+        try {
+            console.log('addActionToEvent: ', payload)
+            // const user = { id: rootGetters['users/loadedUser']['id'], username: rootGetters['users/loadedUser']['username'] }
+            const user = rootGetters['users/loadedUser']
+
+            // 1) Generate a random ID that, for ordering purposes, is the remaining seconds until December 1st, 2050 and today appended by a random number between 1 and 1000
+            const newNode = 2553465600 - moment().unix() + '_' + Math.floor(Math.random() * 1000)
+			// const newNode = moment().add(10, 'years').unix() - moment().unix() + '_' + Math.floor(Math.random() * 1000)
+			
+			// 2) Add new action to event node
+            delete payload.action.id
+            await firebase
+                .database()
+                .ref(`/events/${payload.eventId}/actions/${newNode}`)
+                .set({
+                    id: newNode,
+                    userId: user.id,
+                    username: user.username,
+                    _created_at: moment().unix(),
+                    ...payload.action
 				})
-		} catch (error) {
-			console.log('error: ', error)
-			throw error
-		}	
-	},
-	addActionToEvent({ commit }, payload) {
-		try {
-			console.log('addActionToEvent: ', payload)
+				
+			// 3) Also, add a listener to be notified when users join in
 			firebase
-				.database()
-				.ref(`/events/${payload.eventId}/actions`)
-				.push(payload.action)
-		} catch (error) {
-			console.log('error: ', error)
-			throw error
-		}	
-	},
+                .database()
+                .ref(`events/${payload.eventId}/actions/${newNode}/users`)
+                .on('child_added', function(data) {
+					console.log('CHILD ADDED! ', data.val())
+					commit('setEventActionsUserNotification', data.val())
+					new Noty({
+						type: 'info',
+						text: `${data.val().username} has joined your action`,
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+                })
+        } catch (error) {
+            console.log('error: ', error)
+            throw error
+        }
+    },
+    joinAction({ commit, rootGetters }, payload) {
+        try {
+			console.log('payload: ', payload)
+			const user = rootGetters['users/loadedUser']
+            const userId = user.id
+
+            // 1) Add user to action
+            firebase
+                .database()
+                .ref(`/events/${payload.eventId}/actions/${payload.actionId}/users`)
+                .set({ [userId]: { userId, username: user.username, picture: user.picture } })
+
+            // 2) Update action counter
+            firebase
+                .database()
+                .ref(`events/${payload.eventId}/actions/${payload.actionId}`)
+                .transaction(function(action) {
+                    if (action) {
+                        if (!action.usersCount) {
+                            action.usersCount = 1
+                        } else {
+                            action.usersCount++
+                        }
+                    }
+                    return action
+                })
+        } catch (error) {
+            throw error
+        }
+    },
+    // listenToEventUserActions({ commit }, payload) {
+    //     try {
+    //         firebase
+    //             .database()
+    //             .ref(`events/${payload.eventId}/actions/${payload.actionId}/users`)
+    //             .on('child_added', function(data) {
+    //                 console.log('CHILD ADDED!')
+    //             })
+    //     } catch (error) {
+    //         console.log('error: ', error)
+    //         throw error
+    //     }
+    // }
 }
 
 export const getters = {
-	loadedEvent (state) {
-		return state.loadedEvent
-	},
+    loadedEvent(state) {
+        return state.loadedEvent
+    },
     loadedEventsByDay(state) {
         return state.loadedEventsByDay
     },
     loadedEventsByCompetitionByRound(state) {
         return state.loadedEventsByCompetitionByRound
-	},
-	// loadedEventUsers(state) {
+    },
+    // loadedEventUsers(state) {
     //     return state.loadedEventUsers
-    // }
+	// }
+	loadedEventActionsUserNotification(state) {
+		return state.loadedEventActionsUserNotification
+	}
 }

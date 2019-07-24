@@ -87,6 +87,7 @@
 			</v-flex>
 		</v-layout>
 
+		
 	</v-container>
 </template>
 
@@ -95,25 +96,26 @@
 	export default {
 		layout: 'layoutFront',
 		created() {
-			this.day = moment().add(5, 'days').format('YYYY-MM-DD')
-			this.$store.dispatch('events/fetchEventsByDay', this.day)
+			const today = moment().format('YYYY-MM-DD')
+			this.$store.dispatch('events/fetchEventsByDay', today)
 		},
 		data() {
 			return {
-				day: '',
-				days: ['-2', '-1', '0', '1', '2', '3', '4', '5'],
-				active_day_tab: 2
+				days: ['-3', '-2', '-1', '0', '1', '2', '3', '4', '5'],
+				active_day_tab: 3,
 			}
 		},
 		computed: {
-			
 			loadedUserTeams () {
 				return this.$store.getters['userTeams/loadedUserTeams']
 			},
 			loadedAllEventsByDay() {
+				console.log('loadedAllEventsByDay')
 				// const day = moment().add(this.active_day_tab, 'days').format('YYYY-MM-DD')
 				// console.log('day: ', day)
-				return this.$store.getters['events/loadedEventsByDay'][moment().add(this.active_day_tab, 'days').format('YYYY-MM-DD')]
+				const day = moment().add(this.days[this.active_day_tab], 'days').format('YYYY-MM-DD')
+				this.$store.dispatch('events/fetchEventsByDay', day)
+				return this.$store.getters['events/loadedEventsByDay'][day]
 			},
 			loadedUserEventsByDay () {
 				const userEvents = []
@@ -131,7 +133,7 @@
 		},
 		methods: {
 			displayDate (day) {
-				return moment().add(day, 'days').format('dddd, MMMM Do')
+				return moment().add(day, 'days').format('ddd, MMMM DD')
 			},
 			convertToLocalTime (timestamp) {
 				const utcDiff = new Date().getTimezoneOffset()

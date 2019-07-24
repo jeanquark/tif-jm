@@ -34,7 +34,7 @@ export const actions = {
 				reject(error)
 			}
 		})
-    }
+	},
 }
 
 export const getters = {
