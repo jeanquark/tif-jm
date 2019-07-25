@@ -12,26 +12,26 @@
                 <v-form>
                     <v-card-title class="primary-title">
                         <v-card-text class="text-md-center">
-                            <h2>Ajouter une nouvelle compétition</h2>
+                            <h2>Add a new competition</h2>
                         </v-card-text>
                     </v-card-title>
                     <v-container fluid v-if="loadedCategories != ''">
                         <v-layout row wrap>
                             <v-flex xs6>
-                                <v-subheader class="text-xl-center">Activité</v-subheader>
+                                <v-subheader class="text-xl-center">Activity</v-subheader>
                             </v-flex>
                             <v-flex xs6 v-if="loadedActivities != ''">
-                                <v-autocomplete :items="loadedActivities" v-model="selectedActivity" label="Sélectionner une activité" item-text="name" item-value="slug" single-line :return-object="true"></v-autocomplete>
+                                <v-autocomplete :items="loadedActivities" v-model="selectedActivity" label="Select an activity" item-text="name" item-value="slug" single-line :return-object="true"></v-autocomplete>
                             </v-flex>
                             <v-flex v-else>
                                 <v-progress-linear :indeterminate="true" height="2"></v-progress-linear>
                             </v-flex>
 
                             <v-flex xs6>
-                                <v-subheader class="text-md-right">Catégorie</v-subheader>
+                                <v-subheader class="text-md-right">Category</v-subheader>
                             </v-flex>
                             <v-flex xs6>
-                                <v-autocomplete :items="loadedCategories" v-model="selectedCategory" label="Sélectionner une catégorie" item-text="name" item-value="slug" :autocomplete="true" single-line :disabled="selectedActivity.slug == ''" :return-object="true"></v-autocomplete>
+                                <v-autocomplete :items="loadedCategories" v-model="selectedCategory" label="Select a category" item-text="name" item-value="slug" :autocomplete="true" single-line :disabled="selectedActivity.slug == ''" :return-object="true"></v-autocomplete>
                             </v-flex>
                         </v-layout>
                     </v-container>

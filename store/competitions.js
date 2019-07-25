@@ -2,7 +2,8 @@ import * as firebase from 'firebase/app'
 import 'firebase/database'
 import Noty from 'noty'
 import axios from 'axios'
-import slugify from '../helpers/slugify2.js'
+import slugify from '../helpers/slugify.js'
+import moment from 'moment'
 
 export const state = () => ({
     loadedCompetitions: [],
@@ -97,6 +98,12 @@ export const actions = {
 			const newCompetitionKey = slugify(payload.country) + '_' + slugify(payload.name) + '_' + parseInt(payload.season) + '_' + (parseInt(payload.season) + 1)
 			console.log('newCompetitionKey: ', newCompetitionKey)
 
+			const countries = {}
+			countries[slugify(payload.country)] = {
+				name: payload.country,
+				slug: slugify(payload.country)
+			}
+
 			const newCompetition = {
 				active: false,
 				activity: {
@@ -112,61 +119,82 @@ export const actions = {
 				apifootball_name: payload.name,
 				apifootball_season: payload.season,
 				season_start: payload.season_start,
-				season_end: payload.season_end
+				season_end: payload.season_end,
+				name: payload.name,
+				slug: newCompetitionKey,
+				countries,
+				season: `${payload.season} - ${parseInt(payload.season) + 1}`,
+				_created_at: moment().unix(),
+				_updated_at: moment().unix()
 			}
 
-			let updates = {}
+			// let updates = {}
 			// Update competition node for each team that is part of the competition
 			// for (let team in payload.teams) {
 			// 	updates['/teams/' + team + '/competitions/' + newCompetitionKey] = true
 			// }
 			// Update competitions node
-			updates[`/competitions/${newCompetitionKey}`] = newCompetition
+			// updates[`/competitions/${newCompetitionKey}`] = newCompetition
 
 			await firebase
 				.database()
-				.ref()
-				.update(updates)
+				.ref(`/competitions/${newCompetitionKey}`)
+				.update(newCompetition)
+
 		} catch (error) {
 			console.log('error: ', error)
 			throw error
 		}
-    },
+	},
+	async fetchTeamsByCompetition({ commit }, payload) {
+		try {
+			// console.log('fetchTeamsByCompetition', payload)
+			const league_id = payload.apifootball_id
+			const fetchedTeams = await axios.get(`https://api-football-v1.p.rapidapi.com/v2/teams/league/${league_id}`, {
+				headers: {
+					'Accept': 'application/json',
+				   	'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
+				}
+			})
+			// console.log('fetchedTeams: ', fetchedTeams)
+			let updates = {}
+			fetchedTeams.data.api.teams.forEach(team => {
+				const teamSlug = slugify(team.name)
+				team['slug'] = teamSlug
+				team['apifootball_id'] = team.team_id
+				team['apifootball_name'] = team.name
+				team['competitions'] = Object.assign({}, team['competitions'], {
+					[payload.slug]: true
+				})
+				delete team['logo']
+				delete team['team_id']
+				updates[`/teams/${teamSlug}`] = team
+			})
+			// console.log('updates: ', updates)
+			await firebase.database().ref().update(updates)
+			return
+		} catch (error) {
+			console.log('error: ', error)
+			throw error
+		}
+	},
 
     // Update a competition
-    updateCompetition({ commit, dispatch }, payload) {
-        commit('setLoading', true, { root: true })
-        console.log(payload)
-        // return
+    async updateCompetition({ commit, dispatch }, payload) {
+        try {
+			console.log(payload)
+			payload['_updated_at'] = moment().unix()
 
-        let updates = {}
-        updates['/competitions/'] = payload
+			let updates = {}
+			updates[`/competitions/${payload.slug}`] = payload
 
-        firebase
-            .database()
-            .ref()
-            .update(updates)
-            .then(() => {
-                dispatch('loadedCompetitions')
-                commit('setLoading', false, { root: true })
-                new Noty({
-                    type: 'success',
-                    text: 'Competition modifiée avec succès!',
-                    timeout: 5000,
-                    theme: 'metroui'
-                }).show()
-            })
-            .catch(error => {
-                console.log(error)
-                commit('setLoading', false, { root: true })
-                commit('setError', error, { root: true })
-                new Noty({
-                    type: 'error',
-                    text: 'Competition non modifiée. Erreur: ' + error,
-                    timeout: 5000,
-                    theme: 'metroui'
-                }).show()
-            })
+			await firebase.database().ref().update(updates)
+				
+			// dispatch('loadedCompetitions')
+
+		} catch(error) {
+			throw error
+		}
     },
 
     // Delete a competition

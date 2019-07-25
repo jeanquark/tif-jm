@@ -10,30 +10,30 @@
         <!-- loadedTeams: {{ this.loadedTeams }}<br /><br /> -->
 		<!-- apiFootballKey: {{ apiFootballKey }}<br /><br /> -->
 		<!-- loadedCountries: {{ loadedCountries }}<br /><br /> -->
-		loadedCompetitions: {{ loadedCompetitions }}<br /><br />
-		selectedCompetition: {{ selectedCompetition }}<br /><br />
+		<!-- loadedCompetitions: {{ loadedCompetitions }}<br /><br /> -->
+		<!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
 		<v-card-title class="primary-title">
 			<v-card-text class="text-md-center">
-				<h2>Compétition de Football <i class="fa fa-futbol"></i></h2>
+				<h2>Football competition<i class="fa fa-futbol"></i></h2>
 			</v-card-text>
 		</v-card-title>
 		<v-container>
 			<v-layout row wrap>
 				<v-flex xs12 sm6 offset-sm3>
-					<v-autocomplete :items="loadedCountries" label="Sélectionner un pays" item-text="name" item-value="apifootball_name" single-line :return-object="true" v-model="selectedCountry"></v-autocomplete>
+					<v-autocomplete :items="loadedCountries" label="Select a country" item-text="name" item-value="apifootball_name" single-line :return-object="true" v-model="selectedCountry"></v-autocomplete>
 				</v-flex>
 				<v-flex xs12 sm6 offset-sm3>
-					<v-autocomplete :items="loadedSeasons" label="Sélectionner l'année du début de la saison" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedSeason" @change="fetchCompetitionsByCountryAndSeason"></v-autocomplete>
+					<v-autocomplete :items="loadedSeasons" label="Select year of the starting season" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedSeason" @change="fetchCompetitionsByCountryAndSeason"></v-autocomplete>
 				</v-flex>
 				<!-- <v-flex xs12 class="text-xs-center">
 					<v-btn color="primary" @click.stop="fetchCompetitionsByCountryAndSeason">Get competitions</v-btn>
 				</v-flex> -->
 				<!-- v-if="loadedCompetitions && loadedCompetitions.length > 0" -->
 				<v-flex xs12 sm6 offset-sm3>
-					<v-autocomplete :items="loadedCompetitions" label="Sélectionner une compétition" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedCompetition"></v-autocomplete>
+					<v-autocomplete :items="loadedCompetitions" label="Select a competition" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedCompetition"></v-autocomplete>
 				</v-flex>
 				<v-flex xs12 class="text-xs-center">
-					<v-btn color="primary" @click.stop="addCompetition" :disabled="!selectedCompetition">
+					<v-btn color="primary" @click.stop="addCompetition" :disabled="!selectedCompetition" :loading="loading">
 						Add competition
 					</v-btn>
 				</v-flex>
@@ -61,6 +61,7 @@
 		created() {
 			try {
 				this.$store.dispatch('countries/fetchCountries')
+				this.$store.commit('setLoading', false)
 			} catch (error) {
 				console.log('error: ', error)
 			}
@@ -125,7 +126,10 @@
 			async addCompetition () {
 				try {
 					console.log('addCompetition: ', this.selectedCompetition)
+					this.$store.commit('setLoading', true)
 					await this.$store.dispatch('competitions/createCompetition', this.selectedCompetition)
+					this.$store.commit('setLoading', false)
+					this.$router.push('/admin/competitions')
 					new Noty({
 						type: 'success',
 						text: 'Compétition crée avec succès.',
@@ -134,6 +138,7 @@
 					}).show()
 				} catch (error) {
 					console.log('error: ', error)
+					this.$store.commit('setLoading', false)
 					new Noty({
 						type: 'error',
 						text: 'Une erreur est survenue et la compétition n\'a pas pu être créee.',
