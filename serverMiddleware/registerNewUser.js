@@ -11,7 +11,8 @@ app.use(bodyParser.json());
 function buildUserObject (payload) {
     let user = {}
     user.id = payload.id,
-    user.email = payload.email,
+	user.email = payload.email,
+	user.picture = 'https://i.pinimg.com/originals/f3/af/7b/f3af7b178548bba4b1897c87d7792890.png',
     user.pseudo = payload.pseudo ? payload.pseudo : '',
 	user.birthdate = payload.birthdate ? payload.birthdate : '',
     user.country = {
@@ -194,7 +195,8 @@ function buildUserObject (payload) {
 function buildUserObjectOAuth (payload) {
     let user = {}
     user.id = payload.uid,
-    user.email = payload.email,
+	user.email = payload.email,
+	user.picture = 'https://i.pinimg.com/originals/f3/af/7b/f3af7b178548bba4b1897c87d7792890.png',
     user.language = {
         name: '',
         slug: ''

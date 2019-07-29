@@ -83,8 +83,8 @@ export const actions = {
                 })
         })
     },
-    // Load all teams
-    loadedTeams({ commit }) {
+    // Fetch all teams
+    fetchTeams({ commit }) {
         firebase
             .database()
             .ref('/teams/')

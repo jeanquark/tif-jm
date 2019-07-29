@@ -4,8 +4,11 @@
             <h2 class="white--text">Are you sure?</h2>
         </v-card-title>
         <v-card-text class="card-text">
-            This action will cost you 10 tokens and if followed by 10 other fans, will get your team +10 support
-            action: {{ action }}
+            <!-- This action will cost you 10 tokens and if followed by 10 other fans, will get your team +10 support -->
+            <!-- action: {{ action }} -->
+			<h2 class="text-xs-center mb-2">{{ action.name }}</h2>
+			Cost: {{ action.cost_tokens }} tokens<br /><br />
+			Gain: {{ action.gain_pf }} PF
         </v-card-text>
         <v-card-actions class="card-actions">
             <v-layout row wrap justify-center>

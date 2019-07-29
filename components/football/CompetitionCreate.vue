@@ -132,7 +132,7 @@
 					this.$router.push('/admin/competitions')
 					new Noty({
 						type: 'success',
-						text: 'Compétition crée avec succès.',
+						text: 'Compétition créée avec succès!',
 						timeout: 5000,
 						theme: 'metroui'
 					}).show()

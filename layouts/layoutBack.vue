@@ -67,7 +67,7 @@
                 <v-toolbar-title style="width: 300px" class="ml-0 pl-0">
                     <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
                     <!-- <span class="hidden-sm-and-down" @click="backToSite">Retour au site</span> -->
-                    <v-btn color="success" class="hidden-sm-and-down" @click="backToSite">Retour au site</v-btn>
+                    <v-btn color="success" class="hidden-sm-and-down" @click="backToSite">Back to site</v-btn>
                     <v-icon class="hidden-md-and-up" @click="backToSite">arrow_back</v-icon>
                     <!-- <nuxt-link class="hidden-sm-and-down" to="/" style="color: #fff;">Retour au site</nuxt-link> -->
                 </v-toolbar-title>

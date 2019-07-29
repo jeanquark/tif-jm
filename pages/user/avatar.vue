@@ -134,7 +134,7 @@
     import moment from 'moment'
     import Noty from 'noty'
 	import mergeImages from 'merge-images'
-    import GamemodeHeader from '~/components/GamemodeHeader2'	
+    import GamemodeHeader from '~/components/GamemodeHeader'	
     import BackgroundShape from '~/components/avatar/BackgroundShape.vue'
     import BackgroundColor from '~/components/avatar/BackgroundColor.vue'
     import SkinShape from '~/components/avatar/SkinShape.vue'

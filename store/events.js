@@ -277,7 +277,7 @@ export const actions = {
 				})
 				
 			// 3) Also, add a listener to be notified when users join in
-			firebase
+			await firebase
                 .database()
                 .ref(`events/${payload.eventId}/actions/${newNode}/users`)
                 .on('child_added', function(data) {

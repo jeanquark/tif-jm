@@ -36,7 +36,7 @@
 </template>
 
 <script>
-    import GamemodeHeader from '~/components/GamemodeHeader2'
+    import GamemodeHeader from '~/components/GamemodeHeader'
     import ActionsCard from '~/components/ActionsCard'
     export default {
         components: { GamemodeHeader, ActionsCard },

@@ -4,7 +4,7 @@
 			<div class="loader"></div>
 		</v-content>
 
-		<v-content v-else>
+		<v-content v-else style="">
 			<nuxt/>
 		</v-content>
 	</v-app>

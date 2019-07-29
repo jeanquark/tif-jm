@@ -9,14 +9,18 @@
         <v-flex xs12 sm10 offset-sm1>
             <br /><br />
             <h1 class="text-md-center">Competitions</h1>
-			loadingCompetition: {{ loadingCompetition }}<br />
+            <!-- loadingCompetition: {{ loadingCompetition }}<br /> -->
             <br /><br />
             <v-btn color="primary" dark slot="activator" class="mb-3 ml-0" to="/admin/competitions/create">
                 Add a new competition
             </v-btn>
             <v-card>
+                <v-card-title>
+                    <v-spacer></v-spacer>
+                    <v-text-field v-model="search" append-icon="search" label="Search" single-line hide-details></v-text-field>
+                </v-card-title>
                 <template>
-                    <v-data-table :headers="headers" :items="loadedCompetitions" :rows-per-page-items="[10, 20, 40, 60, 100]" :pagination.sync="pagination" :select-all="false" class="elevation-1">
+                    <v-data-table :headers="headers" :items="loadedCompetitions" :rows-per-page-items="[10, 20, 40, 60, 100]" :pagination.sync="pagination" :select-all="false" class="elevation-1" :search="search">
                         <template slot="items" slot-scope="props">
                             <tr>
                                 <td>{{ props.index + 1 }}</td>
@@ -28,22 +32,26 @@
                                 <td class="text-xs-right" :value="props.item.active">
                                     <v-checkbox primary hide-details v-model="props.item.active" class="text-xs-right" @change="updateCompetitionActiveStatus(props.item)"></v-checkbox>
                                 </td>
-                                <td class="text-xs-left" v-if="props.item.image"><img :src="'/images/competitions/' + props.item.image" width=60 /></td>
+                                <td class="text-xs-center" v-if="props.item.image"><img :src="'/images/competitions/' + props.item.image" height="40px" /></td>
                                 <td v-else></td>
                                 <td class="text-xs-left">{{ props.item.season }}</td>
                                 <td class="text-xs-left">{{ props.item._updated_at | moment('from', 'now') }}</td>
                                 <td class="justify-center px-0">
-									<v-layout align-center>
-										<v-btn small color="success" :loading="loadingCompetition[props.item.slug]" @click.stop="fetchTeamsByCompetition(props.item)">Fetch teams</v-btn>
-										<v-btn icon class="mx-0" :to="'/admin/competitions/' + props.item.id" :id="props.item.id" disabled>
-											<v-icon color="teal">edit</v-icon>
-										</v-btn>
-										<v-btn icon class="mx-0" @click="deleteItem(props.item)">
-											<v-icon color="pink">delete</v-icon>
-										</v-btn>
-									</v-layout>
+                                    <v-layout align-center>
+                                        <v-btn icon class="mx-0" :to="`/admin/competitions/${props.item.id}`" :id="props.item.id">
+                                            <v-icon color="teal">edit</v-icon>
+                                        </v-btn>
+                                        <v-btn icon class="mx-0" @click="requestDeleteConfirmation(props.item)">
+                                            <v-icon color="pink">delete</v-icon>
+                                        </v-btn>
+                                    </v-layout>
                                 </td>
                             </tr>
+                        </template>
+                        <template v-slot:no-results>
+                            <v-alert :value="true" color="error" icon="warning">
+                                Your search for "{{ search }}" found no results.
+                            </v-alert>
                         </template>
                     </v-data-table>
                 </template>
@@ -62,6 +70,16 @@
                 <br />
             </v-card>
         </v-flex>
+
+		<v-snackbar v-model="snackbar" :timeout="6000" :bottom="true" :auto-height="true">
+            <span class="pa-2" style="font-size: 1.2em; line-height: 1.5em;">Are you sure you want to delete competition {{ this.competition.name }} ?</span>
+            <v-btn color="pink" flat @click.stop="deleteCompetition">
+                <span style="font-size: 1.3em;">Yes</span>
+            </v-btn>
+            <v-btn color="secondary" flat @click.stop="snackbar = false">
+                <span style="font-size: 1.3em;">No</span>
+            </v-btn>
+        </v-snackbar>
     </div>
 </template>
 
@@ -71,8 +89,8 @@
 	export default {
 		layout: 'layoutBack',
 		created() {
-			this.$store.dispatch('competitions/loadedCompetitions')
-			this.$store.dispatch('teams/loadedTeams')
+			this.$store.dispatch('competitions/fetchCompetitions')
+			this.$store.dispatch('teams/fetchTeams')
 		},
 		data() {
 			return {
@@ -111,7 +129,9 @@
 					rowsPerPage: 10
 				},
 				newJSON: '',
-				loadingCompetition: new Object()
+				// loadingCompetition: new Object(),
+				competition: {},
+				snackbar: false
 			}
 		},
 		computed: {
@@ -155,18 +175,30 @@
 					this.pagination.descending = false
 				}
 			},
-			deleteItem(item) {
-				this.$refs.confirm
-					.open(
-						'Delete',
-						'Are you sure you want to delete competition "' + item.name + '" ?',
-						{ color: 'red' }
-					)
-					.then(confirm => {
-						if (confirm) {
-							this.$store.dispatch('competitions/deleteCompetition', item)
-						}
-					})
+			requestDeleteConfirmation(competition) {
+				this.competition = competition
+				this.snackbar = true
+			},
+			async deleteCompetition() {
+				try {
+					this.snackbar = false
+					await this.$store.dispatch('competitions/deleteCompetition', this.competition)
+					new Noty({
+						type: 'success',
+						text: 'Successfully deleted competition &#128077;',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				} catch (error) {
+					new Noty({
+						type: 'error',
+						text:
+							'Sorry, an error occured and the competition could not be deleted.',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+					// this.$sentry.captureException(new Error(error))
+				}
 			},
 			onChange(newJson) {
 				this.newJSON = newJson
@@ -202,31 +234,6 @@
 				} catch (error) {
 					commit('setLoading', false, { root: true })
 					console.log('error: ', error)
-				}
-			},
-			async fetchTeamsByCompetition(competition) {
-				try {
-					this.$store.commit('setLoading', true, { root: true })
-					this.loadingCompetition = Object.assign({}, this.loadingCompetition, {
-            			[competition.slug]: true
-        			})
-					await this.$store.dispatch('competitions/fetchTeamsByCompetition', competition)
-					this.loadingCompetition = {}
-					new Noty({
-						type: 'success',
-						text: 'Teams retrieved successfully!',
-						timeout: 5000,
-						theme: 'metroui'
-					}).show()
-				} catch (error) {
-					console.log('error')
-					this.loadingCompetition = {}
-					new Noty({
-						type: 'error',
-						text: 'Sorry, an error occured and the teams could not be retrieved.',
-						timeout: 5000,
-						theme: 'metroui'
-					}).show()
 				}
 			}
 		}
