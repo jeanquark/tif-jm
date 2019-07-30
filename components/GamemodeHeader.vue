@@ -7,11 +7,17 @@
         </v-btn>
         GAMEMODE
         <v-spacer></v-spacer>
-		<!-- loadedUser: {{ loadedUser }} -->
-		<v-btn small color="success" nuxt to="/gamemode">Teams</v-btn>
-		<v-btn small color="info" nuxt to="/user/events">Events</v-btn>
+        <!-- loadedUser: {{ loadedUser }} -->
+        <!-- <v-img :src="loadedUser.picture" max-width="20"></v-img> -->
+        <v-btn small color="success" nuxt to="/gamemode">Teams</v-btn>
+        <v-btn small color="info" nuxt to="/user/events">Events</v-btn>
         <v-btn small color="warning" nuxt to="/admin">Admin (resticted area)</v-btn>
         <v-btn small color="error" @click="logout">Logout</v-btn>
+        <v-btn icon large nuxt to="/user/avatar" v-if="loadedUser">
+            <v-avatar size="42px">
+                <img :src="loadedUser.picture" alt="avatar picture">
+            </v-avatar>
+        </v-btn>
     </v-toolbar>
 </template>
 

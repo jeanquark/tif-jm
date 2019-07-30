@@ -37,11 +37,11 @@
 		},
 		methods: {
 			convertTo2Digits (index) {
-				return this.$parent.$parent.convertTo2Digits(index)
-				// if (index.toString().length < 2) {
-                //     return '0' + index
-                // }
-                // return index.toString()
+				// return this.$parent.$parent.convertTo2Digits(index)
+				if (index.toString().length < 2) {
+                    return '0' + index
+                }
+                return index.toString()
 			},
 			addToMerge (event) {
 		      	this.$emit('addToMergeEmitter', event)

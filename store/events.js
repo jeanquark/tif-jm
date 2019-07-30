@@ -264,7 +264,8 @@ export const actions = {
 			// const newNode = moment().add(10, 'years').unix() - moment().unix() + '_' + Math.floor(Math.random() * 1000)
 			
 			// 2) Add new action to event node
-            delete payload.action.id
+			delete payload.action.id
+			const min_participants_count = Math.ceil((payload.usersCount * payload.action.min_participants_percent || 0) / 100)
             await firebase
                 .database()
                 .ref(`/events/${payload.eventId}/actions/${newNode}`)
@@ -272,23 +273,39 @@ export const actions = {
                     id: newNode,
                     userId: user.id,
                     username: user.username,
-                    _created_at: moment().unix(),
+					_created_at: moment().unix(),
+					usersCount: 1,
+					users: {
+						[user.id]: {
+							userId: user.id,
+							username: user.username,
+							picture: user.picture
+						}
+					},
+					min_participants_count,
+					// progress: 0,
+					// completed: false,
                     ...payload.action
 				})
 				
 			// 3) Also, add a listener to be notified when users join in
-			await firebase
+			firebase
                 .database()
                 .ref(`events/${payload.eventId}/actions/${newNode}/users`)
                 .on('child_added', function(data) {
-					console.log('CHILD ADDED! ', data.val())
-					commit('setEventActionsUserNotification', data.val())
-					new Noty({
-						type: 'info',
-						text: `${data.val().username} has joined your action`,
-						timeout: 5000,
-						theme: 'metroui'
-					}).show()
+					let user = data.val()
+					console.log('user: ', user)
+					user.action = payload.action['name']
+					console.log('CHILD ADDED! ', user)
+					if (user.userId !== rootGetters['users/loadedUser'].id) {
+						commit('setEventActionsUserNotification', user)
+						new Noty({
+							type: 'info',
+							text: `${user.username} has joined your action.`,
+							timeout: 5000,
+							theme: 'metroui'
+						}).show()
+					}
                 })
         } catch (error) {
             console.log('error: ', error)
@@ -301,16 +318,27 @@ export const actions = {
 			const user = rootGetters['users/loadedUser']
             const userId = user.id
 
-            // 1) Add user to action
-            firebase
-                .database()
-                .ref(`/events/${payload.eventId}/actions/${payload.actionId}/users`)
-                .set({ [userId]: { userId, username: user.username, picture: user.picture } })
+			// 1) Add user to action
+			let updates = {}
+			
+			firebase.database().ref(`/events/${payload.eventId}/actions/${payload.action.id}/users`).update({
+				[userId]: { userId, username: user.username, picture: user.picture }})
+				
+			if (payload.usersCount + 1 >= payload.action.min_participants_count) {
+				firebase.database().ref(`/events/${payload.eventId}/actions/${payload.action.id}`).update({ completed: true })
+			}
+
+			firebase.database().ref().update(updates)
+			
+            // firebase
+            //     .database()
+            //     .ref(`/events/${payload.eventId}/actions/${payload.actionId}/users`)
+            //     .update({ [userId]: { userId, username: user.username, picture: user.picture } })
 
             // 2) Update action counter
             firebase
                 .database()
-                .ref(`events/${payload.eventId}/actions/${payload.actionId}`)
+                .ref(`events/${payload.eventId}/actions/${payload.action.id}`)
                 .transaction(function(action) {
                     if (action) {
                         if (!action.usersCount) {
@@ -320,24 +348,28 @@ export const actions = {
                         }
                     }
                     return action
-                })
+				})
+			
+			
         } catch (error) {
             throw error
         }
     },
-    // listenToEventUserActions({ commit }, payload) {
-    //     try {
-    //         firebase
+    // updateEventAction({ commit }, payload) {
+	// 	try {
+	// 		console.log('updateEventAction: ', payload)
+
+	// 		let updates = {}
+	// 		updates[`/events/${payload.eventId}/actions/${payload.actionId}/completed`] = true
+	// 		firebase
     //             .database()
-    //             .ref(`events/${payload.eventId}/actions/${payload.actionId}/users`)
-    //             .on('child_added', function(data) {
-    //                 console.log('CHILD ADDED!')
-    //             })
+    //             .ref()
+	// 			.update(updates)
+							
     //     } catch (error) {
-    //         console.log('error: ', error)
     //         throw error
     //     }
-    // }
+	// }
 }
 
 export const getters = {

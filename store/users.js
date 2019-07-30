@@ -271,15 +271,11 @@ export const actions = {
         }
     },
     async updateAvatarImage({ commit, getters }, payload) {
-        console.log('updateAvatarImage')
-        console.log('payload: ', payload.snapshot.metadata)
-        console.log('loadedUser: ', getters.loadedUser)
-        
-        // return
-
-        // return new Promise((resolve, reject) => {
-        try {
-
+		try {
+			console.log('updateAvatarImage')
+			console.log('payload: ', payload.snapshot.metadata)
+			console.log('loadedUser: ', getters.loadedUser)
+			
             const downloadURL = await payload.snapshot.ref.getDownloadURL()
             // console.log('File available at', downloadURL)
             
@@ -291,22 +287,22 @@ export const actions = {
             console.log('avatarObj: ', avatarObj)
 
             // 1) First delete old avatar image if it exists
-            if (getters.loadedUser && getters.loadedUser.avatar) {
-                var oldImageRef = firebase
-                    .storage()
-                    .ref(`/images/avatars/${getters.loadedUser.avatar.name}`)
-                oldImageRef
-                    .delete()
-                    .then(function() {
-                        console.log('Successfully deleted old image')
-                    })
-                    .catch(function(error) {
-                        console.log(
-                            'An error occured and the old image could not be deleted:'
-                        )
-                        console.log(error)
-                    })
-            }
+            // if (getters.loadedUser && getters.loadedUser.avatar) {
+            //     var oldImageRef = firebase
+            //         .storage()
+            //         .ref(`/images/avatars/${getters.loadedUser.avatar.name}`)
+            //     oldImageRef
+            //         .delete()
+            //         .then(function() {
+            //             console.log('Successfully deleted old image')
+            //         })
+            //         .catch(function(error) {
+            //             console.log(
+            //                 'An error occured and the old image could not be deleted:'
+            //             )
+            //             console.log(error)
+            //         })
+            // }
 
             // 2) Then retrieve all user events
             const userId = firebase.auth().currentUser.uid
@@ -331,6 +327,8 @@ export const actions = {
 
             // 4) Finally, update user node
             updates[`/users/${userId}/avatar`] = avatarObj
+            updates[`/users/${userId}/picture`] = avatarObj.url
+
 
             await firebase
                 .database()
@@ -340,7 +338,6 @@ export const actions = {
             console.log('error: ', error)
             throw error
         }
-        // }
     },
     async loadedUserTeams({ commit, state }) {
         try {

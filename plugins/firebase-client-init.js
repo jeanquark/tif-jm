@@ -14,7 +14,7 @@ var config = {
   authDomain: "tif-jm.firebaseapp.com",
   databaseURL: "https://tif-jm.firebaseio.com",
   projectId: "tif-jm",
-  storageBucket: "",
+  storageBucket: "tif-jm.appspot.com",
   messagingSenderId: "780522905139",
   appId: "1:780522905139:web:7d5a8a1f635b7336"
 };

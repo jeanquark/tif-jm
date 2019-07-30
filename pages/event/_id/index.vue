@@ -7,13 +7,14 @@
                 <!-- <h2 class="text-xs-center">Event page</h2>
                 <nuxt-link to="/user/events">Back to user events page</nuxt-link><br />
                 loadedEvent: {{ loadedEvent }}<br /><br />-->
-				loadedUser: {{ loadedUser }}<br /><br />
+                loadedUser: {{ loadedUser }}<br /><br />
                 loadedEventUsers: {{ loadedEventUsers }}<br /><br />
-				loadedEventActions: {{ loadedEventActions }}<br /><br />
+                loadedEventActions: {{ loadedEventActions }}<br /><br />
                 <!-- loadedActions: {{ loadedActions }}<br /><br />-->
                 event ID: {{ loadedEvent.id }}<br /><br />
                 loadedEventUserActions: {{ loadedEventUserActions }}<br /><br />
                 loadedEventActionsUserNotification: {{ loadedEventActionsUserNotification }}<br /><br />
+                completionRate: {{ completionRate }}<br /><br />
 
                 <GamemodeHeader />
 
@@ -59,9 +60,34 @@
                             </v-flex>
                         </v-layout>
                         <v-layout row wrap justify-center class="mx-2">
-                            <v-progress-linear value="50" height="10"></v-progress-linear>PF
+                            <v-flex xs12>
+                                <v-progress-linear value="50" height="10"></v-progress-linear>
+                            </v-flex>
+                            <v-flex xs12 class="text-xs-center">
+                                PF
+                            </v-flex>
                         </v-layout>
-
+                        <v-layout align-center class="pa-3" v-if="Object.keys(loadedEventActionsUserNotification).length > 0">
+                            <v-avatar :tile="false" :size="30" class="mr-2">
+                                <img :src="loadedEventActionsUserNotification.picture" alt="avatar">
+                            </v-avatar>
+                            {{ loadedEventActionsUserNotification.username }} has joined your action {{ loadedEventActionsUserNotification.action }}!
+                        </v-layout>
+                        <v-layout row wrap>
+                            <v-flex xs12>
+                                <h3 class="text-xs-center">Completed actions:</h3>
+                            </v-flex>
+                            <v-flex xs4 v-for="action in loadedEventActions" :key="action.id" class="pa-3">
+                                <v-card v-if="action.completed">
+                                    <v-img :src="`/images/eventActions/${action.image}`"></v-img>
+                                    <v-card-title>
+										<v-layout justify-center>
+                                        {{ action.name }} by {{ action.username }}
+										</v-layout>
+                                    </v-card-title>
+                                </v-card>
+                            </v-flex>
+                        </v-layout>
                     </v-flex>
                     <v-flex xs3 class="pt-2" style="border: 1px solid red;">
                         <h3 class="text-xs-center">Take an action</h3>
@@ -80,7 +106,7 @@
                                 <h3 class="text-xs-center">Ongoing actions</h3>
                             </v-flex>
                             <v-flex xs12 v-for="action in loadedEventActions" :key="action.id" class="pa-2">
-                                <v-card flat :class="[action.type]">
+                                <v-card flat :class="[action.type]" v-if="!action.completed">
                                     <v-img :src="`/images/eventActions/${action.image}`"></v-img>
                                     <v-card-actions class="justify-center">
                                         <v-layout row wrap>
@@ -90,22 +116,24 @@
                                             <v-flex xs12 class="text-xs-center" v-if="action.type === 'collective'">
                                                 <v-layout row wrap align-center>
                                                     <v-flex xs8>
-                                                        <v-progress-linear :value="calculateCompletionRate(action)"></v-progress-linear>
+                                                        <v-progress-linear :value="(action.usersCount/action.min_participants_count) * 100"></v-progress-linear>
                                                     </v-flex>
                                                     <v-flex xs4>
-                                                        {{ calculateCompletionRate(action) }}%
+                                                        {{ (action.usersCount/action.min_participants_count) * 100 }}%
+                                                        <!-- {{ completionRate[action.id] }}% -->
+                                                        <span v-if="action.completed">COMPLETED!</span>
                                                     </v-flex>
                                                 </v-layout>
                                             </v-flex>
                                             <v-flex xs12 class="text-xs-center">
                                                 <!-- <v-icon color="primary" class="mr-2" @click.stop="joinAction(action)">videogame_asset</v-icon> -->
-												<!--  -->
+                                                <!--  -->
+                                                <!-- <v-btn color="primary" small class="mb-2" @click.stop="joinAction(action)">Join!</v-btn><br /> -->
                                                 <v-btn color="primary" small class="mb-2" @click.stop="joinAction(action)" v-if="loadedEventActions[action.id]['users'] && !loadedEventActions[action.id]['users'][loadedUser.id]">Join!</v-btn><br />
-                                                <span class="my-2" v-if="joinActionSuccess"><b>10 tokens</b></span>
+                                                <!-- <span class="my-2" v-if="joinActionSuccess"><b>10 tokens</b></span> -->
                                                 launched by {{ action.username }}
                                                 at {{ action._created_at | moment('HH:mm') }}<br />
                                                 Participants: {{ action.usersCount || 0 }}<br />
-												<!-- {{ loadedEventActions[action.id]['users'][loadedUser.id] }} -->
                                             </v-flex>
                                         </v-layout>
                                     </v-card-actions>
@@ -143,7 +171,6 @@
 				}
 
 				await this.$store.dispatch('eventActions/fetchEventActions')
-				// await this.$store.dispatch('events/listenToEventUserActions', { eventId, actionId: '989498678_375' })
 			} catch (error) {
 				console.log('error: ', error)
 			}
@@ -152,7 +179,8 @@
 			return {
 				eventActionModal: false,
 				selectedAction: {},
-				joinActionSuccess: false
+				joinActionSuccess: false,
+				completionRate: {}
 			}
 		},
 		computed: {
@@ -196,11 +224,12 @@
 					this.eventActionModal = false
 					this.$store.dispatch('events/addActionToEvent', {
 						eventId: this.loadedEvent.id,
+						usersCount: Object.keys(this.loadedEventUsers).length,
 						action
 					})
 					new Noty({
 						type: 'success',
-						text: 'Successfully created action!',
+						text: 'Action created successfully!',
 						timeout: 5000,
 						theme: 'metroui'
 					}).show()
@@ -219,9 +248,10 @@
 					console.log('joinAction: ', action)
 					this.$store.dispatch('events/joinAction', {
 						eventId: this.loadedEvent.id,
-						actionId: action.id
+						usersCount: Object.keys(this.loadedEventUsers).length,
+						action: action
 					})
-					this.joinActionSuccess = true
+					// this.joinActionSuccess = true
 					new Noty({
 						type: 'success',
 						text: 'Joined action successfully!',
@@ -238,13 +268,20 @@
 					}).show()
 				}
 			},
-			calculateCompletionRate(action) {
-				const numberOfUsers = Object.keys(this.loadedEventUsers).length
-				console.log('numberOfUsers: ', numberOfUsers)
-				const completionThreshold = Math.ceil((numberOfUsers * action.min_participants_percent) / 100)
-				console.log('completionThreshold: ', completionThreshold)
-				return ((action.usersCount || 0) * 100) / completionThreshold
-			}
+			// calculateCompletionRate(action) {
+			// 	const numberOfUsers = Object.keys(this.loadedEventUsers).length
+			// 	console.log('numberOfUsers: ', numberOfUsers)
+			// 	const completionThreshold = Math.ceil((numberOfUsers * action.min_participants_percent) / 100)
+			// 	console.log('completionThreshold: ', completionThreshold)
+			// 	// return ((action.usersCount || 0) * 100) / completionThreshold
+			// 	const completionRate = ((action.usersCount || 0) * 100) / completionThreshold
+			// 	if (parseInt(completionRate) >= 100) {
+			// 		// alert('Action completed!')
+			// 		// this.$store.dispatch('events/updateEventAction', { eventId: this.loadedEvent.id, actionId: action.id })
+			// 	}
+			// 	this.completionRate[action.id] = completionRate
+			// 	// return completionRate
+			// }
 		}
 	}
 </script>
@@ -264,7 +301,7 @@
 		transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
 	}
 	.slide-fade-enter, .slide-fade-leave-to
-							/* .slide-fade-leave-active below version 2.1.8 */ {
+										/* .slide-fade-leave-active below version 2.1.8 */ {
 		transform: translateX(10px);
 		opacity: 0;
 	}

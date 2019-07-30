@@ -37,14 +37,14 @@
 		},
 		methods: {
 			convertTo3Digits (index) {
-				return this.$parent.$parent.convertTo3Digits(index)
+				// return this.$parent.$parent.convertTo3Digits(index)
 				// return this.$emit('convertTo3DigitsEmitter', index)
-				// if (index.toString().length === 1) {
-                //     return '00' + index
-                // } else if (index.toString().length === 2) {
-                //     return '0' + index
-                // }
-                // return index.toString()
+				if (index.toString().length === 1) {
+                    return '00' + index
+                } else if (index.toString().length === 2) {
+                    return '0' + index
+                }
+                return index.toString()
 			},
 			addToMerge (event) {
 		      	this.$emit('addToMergeEmitter', event)

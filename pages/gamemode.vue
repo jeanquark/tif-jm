@@ -2,23 +2,9 @@
     <v-container fluid fill-height style="padding: 0px; max-width: 1017px;">
         <v-layout align-center justify-center>
             <v-flex xs12 style="background: #EEEEEE;">
-                <!-- <v-container align-center justify-center style="padding: 0px; max-width: 1017px; border: 1px solid green;"> -->
-                <!-- <v-layout align-center justify-center> -->
-                <!-- <h1>Gamemode</h1> -->
-				<!-- <p style="display: inline;">
-					loadedUser: {{ loadedUser }}<br /><br />
-					loadedUserTeams: {{ loadedUserTeams }}<br /><br />
-					selectedCompetition: {{ selectedCompetition }}<br /><br />
-					loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br />
-				</p> -->
-				<!-- <v-btn class="warning" @click.stop="logout">Logout</v-btn><br /><br /><br />
-
-				<v-btn class="" to="/">Back to homepage</nuxt-link><br />
-				<nuxt-link to="/user/events">Events</nuxt-link><br />
-				<nuxt-link to="/admin">Admin (restricted access)</nuxt-link><br />
-				<nuxt-link to="/admin/competitions/create">Create competition (restricted area)</nuxt-link><br />
-
-				<br /><br /><br /><br /><br /> -->
+                <!-- loadedCountriesByConfederation: {{ loadedCountriesByConfederation }}<br /><br /> -->
+				<!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
+				<!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
 
                 <gamemode-header />
 
@@ -29,7 +15,7 @@
                     </v-flex>
                     <v-flex xs12 sm6 md4 lg3 class="ma-2" v-for="team in loadedUserTeams" :key="team.slug">
                         <v-card class="ma-3 pt-2">
-                            <v-img :src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4 pa-2"></v-img>
+                            <v-img :src="`/images/teams/${team.image}`" :lazy-src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4 pa-2"></v-img>
                             <v-card-actions>
                                 <v-layout row wrap justify-center align-center>
                                     <v-flex xs12 class="text-xs-center">
@@ -220,31 +206,26 @@
 
 				this.selectedConfederation = this.confederations[this.active_confederation_tab]
 				if (!this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
-					console.log('Call fetchCountriesByConfederation')
+					// console.log('Call fetchCountriesByConfederation')
 					await this.fetchCountriesByConfederation(this.selectedConfederation.slug)
-					// console.log('Done fetching countries by confederation. Continue.')
+					// console.log('Done fetching countries by confederation. [changeConfederation].')
 				}
-				// console.log('Go on!')
+
 				this.active_country_tab = 0
 				this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
 
 				if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
-					console.log('Call fetchCompetitionsByCountry')
+					// console.log('Call fetchCompetitionsByCountry')
 					await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
-					// console.log('Done fetching competitions by country. Continue.')
+					// console.log('Done fetching competitions by country. [changeConfederation].')
 				}
 				this.active_competition_tab = 0
 				this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
 
-				if (
-					this.selectedCompetition
-					// 	this.selectedCompetition.slug &&
-					// 	this.loadedTeamsByCompetition[this.selectedCompetition.slug]
-					// 		.length < 1
-				) {
-					console.log('Call fetchTeamsByCompetition')
+				if (this.selectedCompetition && !this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
+					// console.log('Call fetchTeamsByCompetition')
 					await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
-					// console.log('Done fetching teams by competition. Continue.')
+					// console.log('Done fetching teams by competition. [changeConfederation].')
 				}
 
 				// console.log('abc')
@@ -254,17 +235,25 @@
 				if (this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
 					this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
 					if (
-						this.selectedCountry
+						this.selectedCountry &&
 						// this.selectedCountry.slug &&
-						// this.loadedCompetitionsByCountry[this.selectedCountry.slug]
-						// 	.length < 1
+						!this.loadedCompetitionsByCountry[this.selectedCountry.slug]
+						// Object.keys(this.loadedCompetitionsByCountry[this.selectedCountry.slug]).length < 1
 					) {
 						await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
+						// console.log('Done fetching competitions by country. [changeCountry].')
 					}
+
 					this.active_competition_tab = 0
 					this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
-					if (this.selectedCompetition) {
+
+					if (
+						this.selectedCompetition && 
+						!this.loadedTeamsByCompetition[this.selectedCompetition.slug]
+						// Object.keys(this.loadedTeamsByCompetition[this.selectedCompetition.slug]).length < 1
+					) {
 						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
+					// 	// console.log('Done fetching teams by competition. [changeCountry].')
 					}
 				}
 			},
@@ -275,13 +264,12 @@
 					this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
 					// console.log('this.selectedCompetition: ', this.selectedCompetition)
 					if (
-						this.selectedCompetition
+						this.selectedCompetition &&
 						// 	this.selectedCompetition.slug &&
-						// 	this.loadedTeamsByCompetition[this.selectedCompetition.slug]
-						// 		.length < 1
+						!this.loadedTeamsByCompetition[this.selectedCompetition.slug]
 					) {
 						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
-						console.log('Done fetching teams by competition. Continue.')
+						// console.log('Done fetching teams by competition. [changeCompetition].')
 						// console.log('Go on!')
 					}
 				}
@@ -291,7 +279,7 @@
 				try {
 					// console.log('fetchCountriesByConfederation vue: ', confederationSlug)
 					await this.$store.dispatch('countries/fetchCountriesByConfederation', confederationSlug)
-					console.log('OK done fetching countries by confederation')
+					console.log('Done fetching countries by confederation. [fetchCountriesByConfederation]')
 				} catch (error) {
 					console.log('error: ', error)
 				}
@@ -300,7 +288,7 @@
 				try {
 					// console.log('fetchCompetitionsByCountry vue: ', countrySlug)
 					await this.$store.dispatch('competitions/fetchCompetitionsByCountry', countrySlug)
-					console.log('OK done fetching competitions by country')
+					console.log('Done fetching competitions by country. [fetchCompetitionsByCountry]')
 				} catch (error) {
 					console.log('error: ', error)
 				}
@@ -309,7 +297,7 @@
 				try {
 					console.log('fetchTeamsByCompetition vue: ', competitionSlug)
 					await this.$store.dispatch('teams/fetchTeamsByCompetition', competitionSlug)
-					console.log('OK done fetching teams by competition')
+					console.log('Done fetching teams by competition. [fetchTeamsByCompetition]')
 				} catch (error) {
 					console.log('error: ', error)
 				}

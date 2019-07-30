@@ -47,10 +47,10 @@ export const actions = {
         commit('setTeam', team.val())
         // return team
     },
-    // Fetch teams by country
+    // Fetch teams by competition
     fetchTeamsByCompetition({ commit }, payload) {
         return new Promise(resolve => {
-            console.log('fetchTeamsByCompetition: ', payload)
+            // console.log('fetchTeamsByCompetition: ', payload)
             firebase
                 .database()
                 .ref('/teams/')
@@ -70,11 +70,11 @@ export const actions = {
 							id: team.key
 						})
 					})
-                    console.log('teamsArray: ', teamsArray)
+                    // console.log('teamsArray: ', teamsArray)
                     const orderedTeams = teamsArray.sort(
                         (a, b) => parseInt(b.usersCount || 0) - parseInt(a.usersCount || 0)
 					)
-					console.log('orderedTeams: ', orderedTeams)
+					// console.log('orderedTeams: ', orderedTeams)
                     commit('setTeamsByCompetition', {
                         competition: payload,
                         teams: orderedTeams

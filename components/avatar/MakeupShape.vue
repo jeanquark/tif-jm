@@ -13,7 +13,7 @@
 
         <carousel-3d :width="200" :height="200" :startIndex="makeup_shape - 1">
             <slide v-for="(index, i) in total_makeup_shapes" :index="i" :key="i" >
-                <img v-lazy="'/images/avatars/jm/' + gender + '/makeup/makeup' + convertTo2Digits(index) + '01.png'" class="imgModalAvatar" :class="{active: (makeup_shape === convertTo2Digits(index)) }" style="cursor: pointer;" @click="addToMerge({gender: gender, type: 'makeup', image: 'makeup' + convertTo2Digits(index) + makeup_color + '.png', index: index, layerPosition: 7})" />
+                <img v-lazy="'/images/avatars/jm/' + 'female' + '/makeup/makeup' + convertTo2Digits(index) + '01.png'" class="imgModalAvatar" :class="{active: (makeup_shape === convertTo2Digits(index)) }" style="cursor: pointer;" @click="addToMerge({gender: 'female', type: 'makeup', image: 'makeup' + convertTo2Digits(index) + makeup_color + '.png', index: index, layerPosition: 7})" />
             </slide>
         </carousel-3d>
 	</div>

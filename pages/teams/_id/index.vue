@@ -194,7 +194,7 @@
 </template>
 
 <script>
-	import ScoremodeHeader from '~/components/jm/ScoremodeHeader'
+	import ScoremodeHeader from '~/components/ScoremodeHeader'
 	export default {
 		components: { ScoremodeHeader },
 		layout: 'layoutScoreMode',
