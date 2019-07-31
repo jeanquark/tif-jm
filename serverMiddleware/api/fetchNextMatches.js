@@ -9,6 +9,8 @@ const app = express()
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
+console.log('APIFOOTBALL_KEY: ', process.env.APIFOOTBALL_KEY);
+
 // const today = moment().format('YYYY-MM-DD');
 // const in1day = moment().add(1, 'days').format('YYYY-MM-DD');
 // const in12days = moment().add(12, 'days').format('YYYY-MM-DD');
@@ -21,7 +23,7 @@ function getDailyMatches(day) {
     const url = `https://api-football-v1.p.rapidapi.com/v2/fixtures/date/${day}`
     return unirest.get(url).headers({
         Accept: 'application/json',
-        'X-RapidAPI-Key': 'V5NyybcqoimshrFl7oR8yKKDMyxhp10zkcfjsnGw3uB6ZeMcDI'
+        'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
     })
 }
 
@@ -71,7 +73,7 @@ module.exports = app.use(async function(req, res, next) {
             .equalTo(true)
             .once('value')
         competitions.forEach(competition => {
-            console.log('competition.val(): ', competition.val())
+            // console.log('competition.val(): ', competition.val())
             // if (competition.val().active === true) {
             competitionsArray.push({
                 name: competition.val().name,
@@ -82,7 +84,7 @@ module.exports = app.use(async function(req, res, next) {
             })
             // }
         })
-        console.log('competitionsArray: ', competitionsArray)
+        // console.log('competitionsArray: ', competitionsArray)
 
         // 3) Finally, make external request to API-football to fetch fixtures
         let updates = {}
@@ -91,7 +93,7 @@ module.exports = app.use(async function(req, res, next) {
             Object.values(response.body.api.fixtures).forEach(match => {
                 const competition = competitionsArray.find(competition => competition.apifootball_id == match.league_id)
                 if (competition) {
-                    console.log('match: ', match)
+                    // console.log('match: ', match)
 
                     // Define teams data
                     // const homeTeamData = teamsArray.find(team => parseInt(team.apifootball_id) === parseInt(match.homeTeam.team_id));

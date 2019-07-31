@@ -169,7 +169,7 @@ module.exports = {
             handler: '~/serverMiddleware/api/fetchTeamsForAllActiveCompetitions'
         },
         {
-            path: '/api/fetch-next-matches', // POST request with { until } as body data
+            path: '/api/fetch-next-matches', // GET or POST request with { until } as body data
             handler: '~/serverMiddleware/api/fetchNextMatches'
         },
         {

@@ -73,7 +73,7 @@
                                 PF
                             </v-flex>
                         </v-layout>
-                        <v-layout align-center class="pa-3" v-if="Object.keys(loadedEventActionsUserNotification).length > 0">
+                        <v-layout align-center class="pa-3" v-if="loadedEventActionsUserNotification">
                             <v-avatar :tile="false" :size="30" class="mr-2">
                                 <img :src="loadedEventActionsUserNotification.picture" alt="avatar">
                             </v-avatar>
@@ -176,6 +176,7 @@
 				}
 
 				await this.$store.dispatch('eventActions/fetchEventActions')
+				this.$store.commit('events/setEventActionsUserNotification', null)
 			} catch (error) {
 				console.log('error: ', error)
 			}
