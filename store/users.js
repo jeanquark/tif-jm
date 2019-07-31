@@ -198,59 +198,14 @@ export const actions = {
     },
     async updateUser({ commit }, payload) {
         try {
-            // console.log(payload)
+            console.log('payload: ', payload)
             const userId = firebase.auth().currentUser.uid
-            firebase
-                .database()
-                .ref('/users/' + userId)
-                .update(payload)
-                .then(response => {
-                    new Noty({
-                        type: 'success',
-                        text: "Modifications de l'utilisateur effectuées avec succès",
-                        timeout: 5000,
-                        theme: 'metroui'
-                    }).show()
-                })
-                .catch(error => {
-                    new Noty({
-                        type: 'error',
-                        text: 'Aucune modification effectuée. ' + error,
-                        timeout: 5000,
-                        theme: 'metroui'
-                    }).show()
-                    console.log(error)
-                })
+            await firebase.database().ref(`/users/${userId}`).update(payload)
         } catch (error) {
-            new Noty({
-                type: 'error',
-                text: "Modifications de l'utilisateur non effectuées. Erreur: " + error,
-                timeout: 5000,
-                theme: 'metroui'
-            }).show()
-            console.log(error)
+			console.log('error: ', error)
+			throw error
         }
     },
-    // async signUserIn ({commit}, payload) {
-    //     try {
-    //         let authData = await Auth.signInWithEmailAndPassword(payload.email, payload.password)
-    //         // console.log(authData)
-    //         const userId = authData.uid
-    //         // First set loadedUser with temporary data from firebase auth
-    //         commit('setLoadedUser', authData)
-    //         commit('setLoading', false, { root: true })
-    //         // Then asynchronously update loadedUser object with data from user node
-    //         firebase.database().ref('/users/' + userId).on('value', function (snapshot) {
-    //             commit('setLoadedUser', snapshot.val())
-    //             console.log('loadedUser done')
-    //         })
-    //         console.log(userId)
-    //     }
-    //     catch(error) {
-    //         console.log(error)
-    //         commit('setError', error, { root: true })
-    //     }
-    // },
 
     async loadedAvatarImages({ commit }) {
         try {

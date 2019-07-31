@@ -3,14 +3,20 @@
         <v-layout align-center justify-center>
             <v-flex xs12 style="background: #EEEEEE;">
                 <!-- loadedCountriesByConfederation: {{ loadedCountriesByConfederation }}<br /><br /> -->
-				<!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
-				<!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
-				<!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
+                <!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
+                <!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
+                <!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
 
                 <gamemode-header />
 
                 <!-- <div class="content"> -->
-                <v-layout row wrap justify-center class="my-4" style="">
+                <v-layout row wrap justify-center align-center class="my-4" style="">
+                    <v-flex xs4 offset-xs2 class="text-xs-center">
+                        <v-text-field name="username" label="Username" type="text" v-model="loadedUser.username"></v-text-field>
+                    </v-flex>
+                    <v-flex xs4>
+                        <v-btn small color="success" @click.stop="updateUsername">Update username</v-btn>
+                    </v-flex>
                     <v-flex xs12 class="mb-2 text-xs-center">
                         <h2>My Teams</h2>
                     </v-flex>
@@ -222,22 +228,14 @@
 				console.log('changeCountry')
 				if (this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
 					this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
-					if (
-						this.selectedCountry &&
-						(!this.loadedCompetitionsByCountry[this.selectedCountry.slug] ||
-						this.loadedCompetitionsByCountry[this.selectedCountry.slug].length < 1)
-					) {
+					if (this.selectedCountry && (!this.loadedCompetitionsByCountry[this.selectedCountry.slug] || this.loadedCompetitionsByCountry[this.selectedCountry.slug].length < 1)) {
 						await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
 					}
 
 					this.active_competition_tab = 0
 					this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
 
-					if (
-						this.selectedCompetition && 
-						(!this.loadedTeamsByCompetition[this.selectedCompetition.slug] ||
-						this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)
-					) {
+					if (this.selectedCompetition && (!this.loadedTeamsByCompetition[this.selectedCompetition.slug] || this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)) {
 						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
 					}
 				}
@@ -246,11 +244,7 @@
 				console.log('changeCompetition')
 				if (this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
 					this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
-					if (
-						this.selectedCompetition &&
-						(!this.loadedTeamsByCompetition[this.selectedCompetition.slug] ||
-						this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)
-					) {
+					if (this.selectedCompetition && (!this.loadedTeamsByCompetition[this.selectedCompetition.slug] || this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)) {
 						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
 					}
 				}
@@ -320,8 +314,25 @@
 				}
 			},
 			async fetchCompetitions(year) {},
-			abc() {
-				console.log('Click on abc')
+			async updateUsername() {
+				try {
+					console.log('Click on abc')
+					await this.$store.dispatch('users/updateUser', this.loadedUser)
+					new Noty({
+						type: 'success',
+						text: 'Username updated successfully!',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				} catch (error) {
+					console.log('error: ', error)
+					new Noty({
+						type: 'error',
+						text: 'Sorry, an error occured and your username could not be updated.',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				}
 			}
 		}
 	}

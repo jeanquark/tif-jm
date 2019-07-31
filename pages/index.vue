@@ -24,7 +24,7 @@
 
                             <v-layout justify-center align-center class="my-2">
                                 <v-flex xs12>
-                                    <p>loadedUser: {{ loadedUser }}</p>
+                                    <!-- <p>loadedUser: {{ loadedUser }}</p> -->
                                     Ici on peut placer des informations supplémentaires sur notre application.<br /><br />
                                     <u>Par exemple:</u><br /><br />
                                     

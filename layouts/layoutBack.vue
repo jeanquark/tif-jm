@@ -107,31 +107,32 @@
 			link: []
 		},
 		// middleware: ['admin-check'],
+		middleware: ['auth-check'],
 		created() {
 			setTimeout(() => {
 				this.loadingPage = false
 			}, 1000)
 		},
-		mounted() {
-			console.log(Notification.permission)
-			if (Notification.permission === 'granted') {
-			}
-			if ('serviceWorker' in navigator) {
-				window.addEventListener('load', function(registration) {
-					navigator.serviceWorker
-						.register('/sw.js')
-						.then(function() {
-							console.log(
-								'Service worker registered with scope: ',
-								registration.scope
-							)
-						})
-						.catch(function(err) {
-							console.log(err)
-						})
-				})
-			}
-		},
+		// mounted() {
+		// 	console.log(Notification.permission)
+		// 	if (Notification.permission === 'granted') {
+		// 	}
+		// 	if ('serviceWorker' in navigator) {
+		// 		window.addEventListener('load', function(registration) {
+		// 			navigator.serviceWorker
+		// 				.register('/sw.js')
+		// 				.then(function() {
+		// 					console.log(
+		// 						'Service worker registered with scope: ',
+		// 						registration.scope
+		// 					)
+		// 				})
+		// 				.catch(function(err) {
+		// 					console.log(err)
+		// 				})
+		// 		})
+		// 	}
+		// },
 		data() {
 			return {
 				dialog: false,
