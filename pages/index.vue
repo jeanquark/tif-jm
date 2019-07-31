@@ -10,7 +10,7 @@
                                     <v-btn color="default" @click.stop="openLoginModal">Login</v-btn>
                                     <v-btn color="default" @click.stop="openRegisterModal">Register</v-btn>
                                 </div>
-                                <v-btn round large color="black" nuxt to="/scoremode" class="white--text">Score mode</v-btn>
+                                <v-btn round large color="black" class="white--text">Score mode</v-btn>
                                 <span class="tifUpperHalf">TIF</span>
                             </v-layout>
                             <v-layout justify-center align-center class="lowerHalf">
@@ -20,12 +20,12 @@
                         </div>
 
                         <div class="page-2 page">
-                            <h2 class="part-2" v-animate="{value: 'bounceInRight'}">How it works</h2>
+                            <h2 class="part-2" v-animate="{value: 'bounceInRight'}">Page 2 - How it works</h2>
 
                             <v-layout justify-center align-center class="my-2">
                                 <v-flex xs12>
                                     <p>loadedUser: {{ loadedUser }}</p>
-                                    Ici on peut place des informations supplémentaire sur notre application.<br /><br />
+                                    Ici on peut placer des informations supplémentaires sur notre application.<br /><br />
                                     <u>Par exemple:</u><br /><br />
                                     
                                         Nombre de joueurs<br />
@@ -38,7 +38,7 @@
                         </div>
 
                         <div class="page-3 page">
-                            <h2 class v-animate="{value: 'bounceInTop'}">Contact us</h2>
+                            <h2 class v-animate="{value: 'bounceInTop'}">Page 3 - Contact us</h2>
                         </div>
                     </div>
                 </div>

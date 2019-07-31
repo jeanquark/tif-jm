@@ -16,7 +16,7 @@ export const mutations = {
         state.loadedTeam = payload
     },
     setTeamsByCompetition(state, payload) {
-        console.log('payload2: ', payload)
+        // console.log('payload2: ', payload)
         // state.loadedTeams.payload.competition] = payload.teams
         state.loadedTeamsByCompetition = Object.assign({}, state.loadedTeamsByCompetition, {
             [payload.competition]: payload.teams

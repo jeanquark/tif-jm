@@ -7,28 +7,34 @@
                 <!-- <h2 class="text-xs-center">Event page</h2>
                 <nuxt-link to="/user/events">Back to user events page</nuxt-link><br />
                 loadedEvent: {{ loadedEvent }}<br /><br />-->
-                loadedUser: {{ loadedUser }}<br /><br />
-                loadedEventUsers: {{ loadedEventUsers }}<br /><br />
-                loadedEventActions: {{ loadedEventActions }}<br /><br />
+                <!-- loadedUser: {{ loadedUser }}<br /><br /> -->
+                <!-- loadedEvent: {{ loadedEvent }}<br /><br /> -->
+                <!-- loadedEventUsers: {{ loadedEventUsers }}<br /><br /> -->
+                <!-- loadedEventActions: {{ loadedEventActions }}<br /><br /> -->
+                <!-- loadedCompletedEventActions: {{ loadedCompletedEventActions }}<br /><br /> -->
                 <!-- loadedActions: {{ loadedActions }}<br /><br />-->
-                event ID: {{ loadedEvent.id }}<br /><br />
-                loadedEventUserActions: {{ loadedEventUserActions }}<br /><br />
-                loadedEventActionsUserNotification: {{ loadedEventActionsUserNotification }}<br /><br />
-                completionRate: {{ completionRate }}<br /><br />
+                <!-- event ID: {{ loadedEvent.id }}<br /><br /> -->
+                <!-- loadedEventUserActions: {{ loadedEventUserActions }}<br /><br /> -->
+                <!-- loadedEventActionsUserNotification: {{ loadedEventActionsUserNotification }}<br /><br /> -->
+                <!-- completionRate: {{ completionRate }}<br /><br /> -->
 
                 <GamemodeHeader />
 
                 <v-layout row wrap class="">
-                    <v-flex xs3 class="pt-2" style="border: 1px solid orange;">
+                    <v-flex xs3 class="pt-2" style="">
                         <h3 class="text-xs-center">Players</h3>
                         <transition-group tag="div" name="fade">
                             <v-avatar v-for="user in loadedEventUsers" :key="user.id" class="ma-2">
-                                <!-- {{ user.id }} -->
-                                <v-img :src="user.picture"></v-img>
+                                <v-tooltip bottom>
+                                    <template v-slot:activator="{ on }">
+                                        <v-img :src="user.picture" v-on="on"></v-img>
+                                    </template>
+                                    <span>{{ user.username }} - level {{ user.level }}</span>
+                                </v-tooltip>
                             </v-avatar>
                         </transition-group>
                     </v-flex>
-                    <v-flex xs6 class="pt-2" style="border: 1px solid yellow; background: #fff;">
+                    <v-flex xs6 class="pt-2" style="background: #fff;">
                         <h3 class="text-xs-center my-2">Event</h3>
                         <v-layout row wrap align-center class="pa-2">
                             <v-flex xs4 class="">
@@ -73,26 +79,26 @@
                             </v-avatar>
                             {{ loadedEventActionsUserNotification.username }} has joined your action {{ loadedEventActionsUserNotification.action }}!
                         </v-layout>
-                        <v-layout row wrap>
+                        <v-layout row wrap class="my-3">
                             <v-flex xs12>
                                 <h3 class="text-xs-center">Completed actions:</h3>
                             </v-flex>
-                            <v-flex xs4 v-for="action in loadedEventActions" :key="action.id" class="pa-3">
-                                <v-card v-if="action.completed">
+                            <v-flex xs4 v-for="action in loadedCompletedEventActions" :key="action.id" class="pa-3">
+                                <v-card>
                                     <v-img :src="`/images/eventActions/${action.image}`"></v-img>
                                     <v-card-title>
-										<v-layout justify-center>
-                                        {{ action.name }} by {{ action.username }}
-										</v-layout>
+                                        <v-layout justify-center>
+                                            {{ action.name }} by {{ action.username }}
+                                        </v-layout>
                                     </v-card-title>
                                 </v-card>
                             </v-flex>
                         </v-layout>
                     </v-flex>
-                    <v-flex xs3 class="pt-2" style="border: 1px solid red;">
-                        <h3 class="text-xs-center">Take an action</h3>
+                    <v-flex xs3 class="pt-2" style="">
+                        <h3 class="text-xs-center">Take an action:</h3>
                         <v-layout row wrap>
-                            <v-carousel :hide-delimiter-background="true" :hide-delimiters="true" :show-arrows="true" :show-arrows-on-hover="true" height="220">
+                            <v-carousel :hide-delimiter-background="true" :hide-delimiters="true" :show-arrows="true" :show-arrows-on-hover="true" height="220" style="box-shadow: none;">
                                 <v-carousel-item v-for="action in loadedActions" :key="action.slug" class="carousel-item ma-2" :class="[action.type]" @click.stop="selectAction(action)">
                                     <v-img :src="`/images/eventActions/${action.image}`" :max-height="200"></v-img>
                                     <h3 class="text-xs-center mt-2">
@@ -103,7 +109,7 @@
                         </v-layout>
                         <v-layout row wrap class="mt-4">
                             <v-flex xs12>
-                                <h3 class="text-xs-center">Ongoing actions</h3>
+                                <h3 class="text-xs-center">Ongoing actions:</h3>
                             </v-flex>
                             <v-flex xs12 v-for="action in loadedEventActions" :key="action.id" class="pa-2">
                                 <v-card flat :class="[action.type]" v-if="!action.completed">
@@ -120,7 +126,6 @@
                                                     </v-flex>
                                                     <v-flex xs4>
                                                         {{ (action.usersCount/action.min_participants_count) * 100 }}%
-                                                        <!-- {{ completionRate[action.id] }}% -->
                                                         <span v-if="action.completed">COMPLETED!</span>
                                                     </v-flex>
                                                 </v-layout>
@@ -196,6 +201,19 @@
 			loadedEventActions() {
 				return this.$store.getters['events/loadedEvent']['actions']
 			},
+			loadedCompletedEventActions() {
+				const completedActions = []
+				const allActions = this.$store.getters['events/loadedEvent']['actions']
+				for (const action in allActions) {
+					if (allActions[action].completed) {
+						completedActions.push({
+							...allActions[action],
+							id: action
+						})
+					}
+				}
+				return completedActions
+			},
 			loadedActions() {
 				return this.$store.getters['eventActions/loadedEventActions']
 			},
@@ -218,11 +236,11 @@
 				this.selectedAction = action
 				this.eventActionModal = true
 			},
-			onTakeAction(action) {
+			async onTakeAction(action) {
 				try {
 					console.log('onTakeAction', action)
 					this.eventActionModal = false
-					this.$store.dispatch('events/addActionToEvent', {
+					await this.$store.dispatch('events/addActionToEvent', {
 						eventId: this.loadedEvent.id,
 						usersCount: Object.keys(this.loadedEventUsers).length,
 						action
@@ -243,10 +261,10 @@
 					}).show()
 				}
 			},
-			joinAction(action) {
+			async joinAction(action) {
 				try {
 					console.log('joinAction: ', action)
-					this.$store.dispatch('events/joinAction', {
+					await this.$store.dispatch('events/joinAction', {
 						eventId: this.loadedEvent.id,
 						usersCount: Object.keys(this.loadedEventUsers).length,
 						action: action
@@ -267,21 +285,7 @@
 						theme: 'metroui'
 					}).show()
 				}
-			},
-			// calculateCompletionRate(action) {
-			// 	const numberOfUsers = Object.keys(this.loadedEventUsers).length
-			// 	console.log('numberOfUsers: ', numberOfUsers)
-			// 	const completionThreshold = Math.ceil((numberOfUsers * action.min_participants_percent) / 100)
-			// 	console.log('completionThreshold: ', completionThreshold)
-			// 	// return ((action.usersCount || 0) * 100) / completionThreshold
-			// 	const completionRate = ((action.usersCount || 0) * 100) / completionThreshold
-			// 	if (parseInt(completionRate) >= 100) {
-			// 		// alert('Action completed!')
-			// 		// this.$store.dispatch('events/updateEventAction', { eventId: this.loadedEvent.id, actionId: action.id })
-			// 	}
-			// 	this.completionRate[action.id] = completionRate
-			// 	// return completionRate
-			// }
+			}
 		}
 	}
 </script>
@@ -301,7 +305,7 @@
 		transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
 	}
 	.slide-fade-enter, .slide-fade-leave-to
-										/* .slide-fade-leave-active below version 2.1.8 */ {
+												/* .slide-fade-leave-active below version 2.1.8 */ {
 		transform: translateX(10px);
 		opacity: 0;
 	}

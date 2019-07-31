@@ -128,6 +128,8 @@
 	// import firebase from '~/plugins/firebase-client-init'
 	// import firebase from 'firebase'
 	import firebase from 'firebase/app'
+	import 'firebase/storage'
+
 	import moment from 'moment'
 	import Noty from 'noty'
 	import mergeImages from 'merge-images'

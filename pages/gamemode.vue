@@ -5,6 +5,7 @@
                 <!-- loadedCountriesByConfederation: {{ loadedCountriesByConfederation }}<br /><br /> -->
 				<!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
 				<!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
+				<!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
 
                 <gamemode-header />
 
@@ -70,7 +71,6 @@
                                                         <v-flex xs3 class="text-xs-right">
                                                             <v-layout align-center>
                                                                 <img src="/images/icons/icon_48x48.png" width="20" />
-                                                                <!-- <v-img src="/images/icons/icon_48x48.png" :max-width="40"></v-img> -->
                                                                 <span class="ml-2">{{ team.usersCount || 0 }}</span>
                                                             </v-layout>
                                                         </v-flex>
@@ -102,16 +102,14 @@
 		components: { GamemodeHeader },
 		layout: 'layoutGamemode',
 		async created() {
-			// await this.fetchCountriesByConfederation('uefa')
 			await this.changeConfederation()
-			// if (!this.$store.getters['userTeams/loadedUserTeams'] || this.$store.getters['userTeams/loadedUserTeams'].length < 1) {
-			console.log('fetchUserTeams')
 			try {
 				await this.$store.dispatch('userTeams/fetchUserTeams')
 			} catch (error) {
 				console.log('error from created: ', error)
 			}
-			// }
+			// this.$sentry.captureException(new Error('oups, there is an error from the server'))
+			// myUndefinedFunction();
 		},
 		data() {
 			return {
@@ -202,33 +200,23 @@
 			async changeConfederation() {
 				console.log('changeConfederation')
 
-				// console.log('this.active_confederation_tab: ', this.active_confederation_tab)
-
 				this.selectedConfederation = this.confederations[this.active_confederation_tab]
 				if (!this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
-					// console.log('Call fetchCountriesByConfederation')
 					await this.fetchCountriesByConfederation(this.selectedConfederation.slug)
-					// console.log('Done fetching countries by confederation. [changeConfederation].')
 				}
 
 				this.active_country_tab = 0
 				this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
 
 				if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
-					// console.log('Call fetchCompetitionsByCountry')
 					await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
-					// console.log('Done fetching competitions by country. [changeConfederation].')
 				}
 				this.active_competition_tab = 0
 				this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
 
 				if (this.selectedCompetition && !this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
-					// console.log('Call fetchTeamsByCompetition')
 					await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
-					// console.log('Done fetching teams by competition. [changeConfederation].')
 				}
-
-				// console.log('abc')
 			},
 			async changeCountry() {
 				console.log('changeCountry')
@@ -236,12 +224,10 @@
 					this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
 					if (
 						this.selectedCountry &&
-						// this.selectedCountry.slug &&
-						!this.loadedCompetitionsByCountry[this.selectedCountry.slug]
-						// Object.keys(this.loadedCompetitionsByCountry[this.selectedCountry.slug]).length < 1
+						(!this.loadedCompetitionsByCountry[this.selectedCountry.slug] ||
+						this.loadedCompetitionsByCountry[this.selectedCountry.slug].length < 1)
 					) {
 						await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
-						// console.log('Done fetching competitions by country. [changeCountry].')
 					}
 
 					this.active_competition_tab = 0
@@ -249,35 +235,29 @@
 
 					if (
 						this.selectedCompetition && 
-						!this.loadedTeamsByCompetition[this.selectedCompetition.slug]
-						// Object.keys(this.loadedTeamsByCompetition[this.selectedCompetition.slug]).length < 1
+						(!this.loadedTeamsByCompetition[this.selectedCompetition.slug] ||
+						this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)
 					) {
 						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
-					// 	// console.log('Done fetching teams by competition. [changeCountry].')
 					}
 				}
 			},
 			async changeCompetition() {
 				console.log('changeCompetition')
 				if (this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
-					// console.log('this.active_competition_tab: ', this.active_competition_tab)
 					this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
-					// console.log('this.selectedCompetition: ', this.selectedCompetition)
 					if (
 						this.selectedCompetition &&
-						// 	this.selectedCompetition.slug &&
-						!this.loadedTeamsByCompetition[this.selectedCompetition.slug]
+						(!this.loadedTeamsByCompetition[this.selectedCompetition.slug] ||
+						this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)
 					) {
 						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
-						// console.log('Done fetching teams by competition. [changeCompetition].')
-						// console.log('Go on!')
 					}
 				}
 			},
 
 			async fetchCountriesByConfederation(confederationSlug) {
 				try {
-					// console.log('fetchCountriesByConfederation vue: ', confederationSlug)
 					await this.$store.dispatch('countries/fetchCountriesByConfederation', confederationSlug)
 					console.log('Done fetching countries by confederation. [fetchCountriesByConfederation]')
 				} catch (error) {
@@ -286,7 +266,6 @@
 			},
 			async fetchCompetitionsByCountry(countrySlug) {
 				try {
-					// console.log('fetchCompetitionsByCountry vue: ', countrySlug)
 					await this.$store.dispatch('competitions/fetchCompetitionsByCountry', countrySlug)
 					console.log('Done fetching competitions by country. [fetchCompetitionsByCountry]')
 				} catch (error) {
@@ -295,7 +274,6 @@
 			},
 			async fetchTeamsByCompetition(competitionSlug) {
 				try {
-					console.log('fetchTeamsByCompetition vue: ', competitionSlug)
 					await this.$store.dispatch('teams/fetchTeamsByCompetition', competitionSlug)
 					console.log('Done fetching teams by competition. [fetchTeamsByCompetition]')
 				} catch (error) {

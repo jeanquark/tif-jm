@@ -27,7 +27,7 @@
 				{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Acme' }
 			]
 		},
-		// middleware: ['auth-check'],
+		middleware: ['auth-check'],
 		created () {
 			setTimeout(() => {
 			  	this.loadingPage = false

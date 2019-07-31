@@ -13,7 +13,7 @@ function buildUserObject (payload) {
     user.id = payload.id,
 	user.email = payload.email,
 	user.picture = '/images/avatar.png',
-    user.pseudo = payload.pseudo ? payload.pseudo : '',
+    user.username = payload.username ? payload.username : '',
 	user.birthdate = payload.birthdate ? payload.birthdate : '',
     user.country = {
         name: payload.country.name ? payload.country.name : '',
@@ -197,6 +197,7 @@ function buildUserObjectOAuth (payload) {
     user.id = payload.uid,
 	user.email = payload.email,
 	user.picture = '/images/avatar.png',
+	user.username = 'tif player',
     user.language = {
         name: '',
         slug: ''
@@ -368,9 +369,9 @@ function buildUserObjectOAuth (payload) {
 
 module.exports = app.use(async function (req, res, next) {
     try {
-        console.log('REGISTER NEW USER');
-        console.log('req.body.type: ', req.body.type);
-        console.log('req.body.data: ', req.body.data);
+        // console.log('REGISTER NEW USER');
+        // console.log('req.body.type: ', req.body.type);
+        // console.log('req.body.data: ', req.body.data);
 
         let newUser = {};
         if (req.body && req.body.data && req.body.type === 'oauth') {
@@ -378,30 +379,23 @@ module.exports = app.use(async function (req, res, next) {
         } else if (req.body && req.body.data && req.body.type === 'form') {
             newUser = buildUserObject(req.body.data);
         }
-        console.log('newUser: ', newUser);
+        // console.log('newUser: ', newUser);
         const userId = newUser.id;
-        console.log('newUserId: ', userId);
+        // console.log('newUserId: ', userId);
 
-        var db = admin.database();
-        var ref = db.ref('users');
-        var usersRef = ref.child(userId);
+        var userRef = admin.database().ref('users').child(userId);
 
-        usersRef.set(newUser, function(error) {
+        userRef.set(newUser, function(error) {
             if (error) {
                 console.log('User could not be registered.' + error);
             } else {
-                console.log('User was registered successfully.');
+                // console.log('User was registered successfully.');
             }
         });
         
-        // await admin.database().ref('users').child(userId).set(newUser);
-        // res.end('Hello from RegisterNewUser!\n');
-        // res.end('Successfully registered new user');
         res.send(newUser);
-        // next();
     } 
     catch (error) {
-        // res.end('Server error');
         res.status(500).send(`Server error, user could not be registered, ${error}`);
     }
 });

@@ -55,7 +55,8 @@ export const actions = {
                         }
                     }
                     // console.log('competitionsArray: ', competitionsArray)
-                    const orderedCompetitions = competitionsArray.sort((a, b) => a.ranking_country - b.ranking_country)
+					const orderedCompetitions = competitionsArray.sort((a, b) => a.ranking_country - b.ranking_country)
+					// console.log('orderedCompetitions: ', orderedCompetitions)
                     commit('setCompetitionsByCountry', {
                         country: payload,
                         competitions: orderedCompetitions

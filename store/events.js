@@ -306,7 +306,7 @@ export const actions = {
 							theme: 'metroui'
 						}).show()
 					}
-                })
+				})
         } catch (error) {
             console.log('error: ', error)
             throw error

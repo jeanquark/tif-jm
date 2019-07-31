@@ -26,7 +26,7 @@
 
                     <v-text-field label="Repeat Password" type="password" name="password_confirm" v-validate="'required|confirmed:password'" :error="errors.has('password_confirm')" :error-messages="errors.collect('password_confirm')" data-vv-as="Repeat Password" v-model="form.password_confirm"></v-text-field>
 
-                    <v-text-field label="Pseudo" name="pseudo" v-validate="'required|max:16'" :error="errors.has('pseudo')" :error-messages="errors.collect('pseudo')" data-vv-as="Pseudo" v-model="form.username"></v-text-field>
+                    <v-text-field label="Username" name="username" v-validate="'required|max:16'" :error="errors.has('username')" :error-messages="errors.collect('username')" data-vv-as="Username" v-model="form.username"></v-text-field>
 
                     <!-- <v-autocomplete
 					    label="Select your birth year"
@@ -120,8 +120,7 @@
 		layout: 'layoutFront',
 		created() {
 			this.$store.commit('clearError')
-			this.$store.dispatch('countries/loadedCountries')
-			// this.$store.dispatch("birthyear/loadedBirthyear")
+			this.$store.dispatch('countries/fetchCountries')
 		},
 		async mounted() {},
 		data: () => ({
