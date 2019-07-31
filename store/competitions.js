@@ -149,7 +149,7 @@ export const actions = {
             const fetchedTeams = await axios.get(`https://api-football-v1.p.rapidapi.com/v2/teams/league/${league_id}`, {
                 headers: {
                     Accept: 'application/json',
-                    'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
+                    'X-RapidAPI-Key': 'V5NyybcqoimshrFl7oR8yKKDMyxhp10zkcfjsnGw3uB6ZeMcDI'
                 }
             })
             console.log('fetchedTeams: ', fetchedTeams)
