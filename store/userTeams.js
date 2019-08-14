@@ -38,10 +38,14 @@ export const actions = {
             }
         })
     },
-    async selectUserTeam({ commit, rootGetters }, payload) {
+    async selectUserTeam({ commit, getters, rootGetters }, payload) {
         try {
             console.log('selectUserTeams: ', payload)
-            const userId = rootGetters['users/loadedUser'].id
+			const userId = rootGetters['users/loadedUser'].id
+			
+			if (getters['loadedUserTeams'].find(team => team.id === payload.id)) {
+				throw 'team_already_picked'
+			}
 
             // Update userTeams node
             await firebase

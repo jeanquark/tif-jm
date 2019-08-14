@@ -200,7 +200,23 @@ export const actions = {
         try {
             console.log('payload: ', payload)
             const userId = firebase.auth().currentUser.uid
-            await firebase.database().ref(`/users/${userId}`).update(payload)
+			
+			// 1) Retrieve all events the user is part of
+            let updates = {}
+			
+			const snapshot = await firebase.database().ref('/events').orderByChild(`users/${userId}/id`).equalTo(userId).once('value')
+			for (const key in snapshot.val()) {
+				updates[`/events/${key}/users/${userId}/username`] = payload.username
+			}
+
+            // 2) Update user node
+            updates[`/users/${userId}`] = payload
+
+            await firebase
+                .database()
+                .ref()
+				.update(updates)
+				
         } catch (error) {
 			console.log('error: ', error)
 			throw error

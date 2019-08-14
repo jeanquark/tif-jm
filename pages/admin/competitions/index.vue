@@ -30,7 +30,7 @@
                                     <span v-for="(country, index) in props.item.countries" :key="index">{{ country.name }}<span v-if="index < props.item.countries.length - 1">,&nbsp;</span></span>
                                 </td>
                                 <td class="text-xs-right" :value="props.item.active">
-                                    <v-checkbox primary hide-details v-model="props.item.active" class="text-xs-right" @change="updateCompetitionActiveStatus(props.item)"></v-checkbox>
+                                    <v-checkbox primary hide-details v-model="props.item.active" class="text-xs-right" @change="toggleCompetitionActiveStatus(props.item)"></v-checkbox>
                                 </td>
                                 <td class="text-xs-center" v-if="props.item.image"><img :src="'/images/competitions/' + props.item.image" height="40px" /></td>
                                 <td v-else></td>
@@ -203,10 +203,10 @@
 			onChange(newJson) {
 				this.newJSON = newJson
 			},
-			updateCompetitionActiveStatus(competition) {
+			toggleCompetitionActiveStatus(competition) {
 				try {
 					console.log('updateCompetitionActiveStatus: ', competition)
-					this.$store.dispatch('competitions/updateCompetition', competition)
+					this.$store.dispatch('competitions/toggleCompetitionActiveStatus', competition)
 					new Noty({
 						type: 'success',
 						text: 'Competition status updated successfully!',

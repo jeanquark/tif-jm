@@ -17,14 +17,25 @@
                 <!-- loadedEventUserActions: {{ loadedEventUserActions }}<br /><br /> -->
                 <!-- loadedEventActionsUserNotification: {{ loadedEventActionsUserNotification }}<br /><br /> -->
                 <!-- completionRate: {{ completionRate }}<br /><br /> -->
+                <!-- loadedEventHomeTeamNotifications: {{ loadedEventHomeTeamNotifications }}<br /><br /> -->
+                <!-- loadedEventVisitorTeamNotifications: {{ loadedEventVisitorTeamNotifications }}<br /><br /> -->
 
                 <GamemodeHeader />
 
                 <v-layout row wrap class="">
                     <v-flex xs3 class="pt-2" style="">
-                        <h3 class="text-xs-center">Players</h3>
+                        <v-layout justify-center align-center style="background: yellow;">
+							<v-img :src="`/images/teams/${loadedEvent.homeTeam_slug}.png`" max-width="40" class="mr-2"></v-img> fans ({{ loadedEventUsersHomeTeam.length }})
+                        </v-layout>
+						<v-layout justify-center my-2>
+							<transition name="fadeIn" mode="out-in">
+								<div :key="loadedEvent.homeTeam_notification">
+									{{ loadedEvent.homeTeam_notification }}
+								</div>
+							</transition>
+						</v-layout>
                         <transition-group tag="div" name="fade">
-                            <v-avatar v-for="user in loadedEventUsers" :key="user.id" class="ma-2">
+                            <v-avatar v-for="user in loadedEventUsersHomeTeam" :key="user.id" :size="42" class="ma-2">
                                 <v-tooltip bottom>
                                     <template v-slot:activator="{ on }">
                                         <v-img :src="user.picture" v-on="on"></v-img>
@@ -67,10 +78,10 @@
                         </v-layout>
                         <v-layout row wrap justify-center class="mx-2">
                             <v-flex xs12>
-                                <v-progress-linear value="50" height="10"></v-progress-linear>
+                                <v-progress-linear :value="loadedEvent.homeTeam_pf * 100 / (loadedEvent.homeTeam_pf + loadedEvent.visitorTeam_pf)" height="10"></v-progress-linear>
                             </v-flex>
                             <v-flex xs12 class="text-xs-center">
-                                PF
+                                {{ loadedEvent.homeTeam_pf + loadedEvent.visitorTeam_pf }} PF
                             </v-flex>
                         </v-layout>
                         <v-layout align-center class="pa-3" v-if="loadedEventActionsUserNotification">
@@ -96,6 +107,26 @@
                         </v-layout>
                     </v-flex>
                     <v-flex xs3 class="pt-2" style="">
+                        <v-layout justify-center align-center style="background: yellow;">
+                            <v-img :src="`/images/teams/${loadedEvent.visitorTeam_slug}.png`" max-width="40" class="mr-2"></v-img> fans ({{ loadedEventUsersVisitorTeam.length }})
+                        </v-layout>
+						<v-layout justify-center my-2>
+							<transition name="fadeIn" mode="out-in">
+								<div :key="loadedEvent.visitorTeam_notification">
+									{{ loadedEvent.visitorTeam_notification }}
+								</div>
+							</transition>
+						</v-layout>
+                        <transition-group tag="div" name="fade">
+                            <v-avatar v-for="user in loadedEventUsersVisitorTeam" :key="user.id" :size="42" class="ma-2">
+                                <v-tooltip bottom>
+                                    <template v-slot:activator="{ on }">
+                                        <v-img :src="user.picture" v-on="on"></v-img>
+                                    </template>
+                                    <span>{{ user.username }} - level {{ user.level }}</span>
+                                </v-tooltip>
+                            </v-avatar>
+                        </transition-group>
                         <h3 class="text-xs-center">Take an action:</h3>
                         <v-layout row wrap>
                             <v-carousel :hide-delimiter-background="true" :hide-delimiters="true" :show-arrows="true" :show-arrows-on-hover="true" height="220" style="box-shadow: none;">
@@ -131,11 +162,7 @@
                                                 </v-layout>
                                             </v-flex>
                                             <v-flex xs12 class="text-xs-center">
-                                                <!-- <v-icon color="primary" class="mr-2" @click.stop="joinAction(action)">videogame_asset</v-icon> -->
-                                                <!--  -->
-                                                <!-- <v-btn color="primary" small class="mb-2" @click.stop="joinAction(action)">Join!</v-btn><br /> -->
                                                 <v-btn color="primary" small class="mb-2" @click.stop="joinAction(action)" v-if="loadedEventActions[action.id]['users'] && !loadedEventActions[action.id]['users'][loadedUser.id]">Join!</v-btn><br />
-                                                <!-- <span class="my-2" v-if="joinActionSuccess"><b>10 tokens</b></span> -->
                                                 launched by {{ action.username }}
                                                 at {{ action._created_at | moment('HH:mm') }}<br />
                                                 Participants: {{ action.usersCount || 0 }}<br />
@@ -148,7 +175,14 @@
                     </v-flex>
                 </v-layout>
 
-                <!-- Action Modal -->
+
+				<!-- Select side modal -->
+                <v-dialog v-model="selectSideModal" width="500" lazy :persistent="true">
+					<SelectSide :event="loadedEvent" :message="message" @selectSide="onSelectSide" />
+                </v-dialog>
+
+
+                <!-- Action modal -->
                 <v-dialog v-model="eventActionModal" width="500" lazy :persistent="false">
                     <EventAction :action="selectedAction" @takeAction="onTakeAction" />
                 </v-dialog>
@@ -160,20 +194,55 @@
 <script>
 	import Noty from 'noty'
 	import GamemodeHeader from '~/components/GamemodeHeader'
+	import SelectSide from '~/components/SelectSide'
 	import EventAction from '~/components/EventAction'
 	export default {
-		components: { GamemodeHeader, EventAction },
+		beforeRouteLeave(to, from, next) {
+			console.log('to: ', to)
+			console.log('from: ', from)
+			// Set inactive user
+			const isFanHomeTeam = this.loadedEvent['users'][this.loadedUser.id]['team'] === this.loadedEvent.homeTeam_slug
+			this.$store.dispatch('events/removeUserFromEvent', { eventId: this.loadedEvent.id, user: this.loadedUser, isFanHomeTeam })
+			next()
+		},
+		components: { GamemodeHeader, SelectSide, EventAction },
 		layout: 'layoutGamemode',
 		async created() {
 			try {
 				const eventId = this.$route.params.id
 				await this.$store.dispatch('events/fetchEvent', eventId)
 
-				// Add user to event if not already present
-				if (!this.loadedEvent['users'] || !this.loadedEvent['users'][this.loadedUser.id]) {
-					console.log('Add user to event')
-					this.$store.dispatch('events/addUserToEvent', eventId)
+				// this.$store.commit('events/clearEventHomeTeamNotifications')
+				// this.$store.commit('events/clearEventVisitorTeamNotifications')
+
+				const userTeams = this.$store.getters['userTeams/loadedUserTeams']
+				console.log('userTeams: ', userTeams)
+				const fanHomeTeam = userTeams.find(team => team.slug === this.loadedEvent.homeTeam_slug)
+				const fanVisitorTeam = userTeams.find(team => team.slug === this.loadedEvent.visitorTeam_slug)
+
+				if (fanHomeTeam && fanVisitorTeam) {
+					console.log('User is fan of both teams!')
+					this.message = 'You are fan of both teams. Pick your preference for this game.'
+					this.selectSideModal = true
+				} else if (fanHomeTeam) {
+					console.log('User is fan of home team!')
+					await this.onSelectSide({ eventId: this.loadedEvent.id, teamId: this.loadedEvent.homeTeam_slug, isFanHomeTeam: true })
+					// this.$store.dispatch('events/addUserToEvent', { eventId, teamId: this.loadedEvent.homeTeam_slug, isFanHomeTeam: true })
+				} else if (fanVisitorTeam) {
+					console.log('User is fan of visitor team!')
+					await this.onSelectSide({ eventId: this.loadedEvent.id, teamId: this.loadedEvent.visitorTeam_slug, isFanHomeTeam: false })
+					// this.$store.dispatch('events/addUserToEvent', { eventId, teamId: this.loadedEvent.visitorTeam_slug, isFanHomeTeam: false })
+				} else {
+					this.selectSideModal = true
+					this.message = 'You are not fan of either team. Pick a side for this game.'
 				}
+
+				// Add user to event if not already present
+				// if (!this.loadedEvent['users'] || !this.loadedEvent['users'][this.loadedUser.id]) {
+				// 	console.log('Add user to event')
+				// 	this.selectSideModal = true
+				// 	// this.$store.dispatch('events/addUserToEvent', eventId)
+				// }
 
 				await this.$store.dispatch('eventActions/fetchEventActions')
 				this.$store.commit('events/setEventActionsUserNotification', null)
@@ -184,9 +253,11 @@
 		data() {
 			return {
 				eventActionModal: false,
+				selectSideModal: false,
 				selectedAction: {},
 				joinActionSuccess: false,
-				completionRate: {}
+				completionRate: {},
+				message: ''
 			}
 		},
 		computed: {
@@ -197,7 +268,19 @@
 				return this.$store.getters['events/loadedEvent']
 			},
 			loadedEventUsers() {
-				return this.$store.getters['events/loadedEvent']['users']
+				// return this.$store.getters['events/loadedEvent']['users']
+				// .filter(user => user.team === 'neuchatel_xamax_fc')
+				const usersObject = this.$store.getters['events/loadedEvent']['users']
+				if (usersObject) {
+					return Object.keys(usersObject).map(k => usersObject[k])
+				}
+				return []
+			},
+			loadedEventUsersHomeTeam() {
+				return this.loadedEventUsers.filter(user => user.team === this.loadedEvent.homeTeam_slug && user.active)
+			},
+			loadedEventUsersVisitorTeam() {
+				return this.loadedEventUsers.filter(user => user.team === this.loadedEvent.visitorTeam_slug && user.active)
 			},
 			loadedEventActions() {
 				return this.$store.getters['events/loadedEvent']['actions']
@@ -229,13 +312,29 @@
 			},
 			loadedEventActionsUserNotification() {
 				return this.$store.getters['events/loadedEventActionsUserNotification']
-			}
+			},
+			// loadedEventHomeTeamNotifications() {
+			// 	return this.$store.getters['events/loadedEventHomeTeamNotifications']
+			// },
+			// loadedEventVisitorTeamNotifications() {
+			// 	return this.$store.getters['events/loadedEventVisitorTeamNotifications']
+			// }
 		},
 		methods: {
 			selectAction(action) {
 				console.log('selectAction: ', action)
 				this.selectedAction = action
 				this.eventActionModal = true
+			},
+			async onSelectSide(payload) {
+				try {
+					console.log('payload: ', payload)
+					await this.$store.dispatch('events/addUserToEvent', payload)
+					this.selectSideModal = false
+				} catch (error) {
+					console.log('error: ', error)
+					this.selectSideModal = false
+				}
 			},
 			async onTakeAction(action) {
 				try {
@@ -267,6 +366,8 @@
 					console.log('joinAction: ', action)
 					await this.$store.dispatch('events/joinAction', {
 						eventId: this.loadedEvent.id,
+						homeTeam_pf: this.loadedEvent.homeTeam_pf,
+						visitorTeam_pf: this.loadedEvent.visitorTeam_pf,
 						usersCount: Object.keys(this.loadedEventUsers).length,
 						action: action
 					})
@@ -306,7 +407,7 @@
 		transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
 	}
 	.slide-fade-enter, .slide-fade-leave-to
-												/* .slide-fade-leave-active below version 2.1.8 */ {
+		/* .slide-fade-leave-active below version 2.1.8 */ {
 		transform: translateX(10px);
 		opacity: 0;
 	}
@@ -318,5 +419,13 @@
 	}
 	.collective {
 		background: green;
+	}
+
+	/* Transition effect */
+	.fadeIn-enter-active {
+		transition: 2s;
+	}
+	.fadeIn-enter-to {
+		color: var(--v-primary-base);
 	}
 </style>

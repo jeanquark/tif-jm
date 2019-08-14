@@ -9,7 +9,9 @@ export const state = () => ({
     loadedEvent: {},
     loadedEventsByDay: {},
     loadedEventsByCompetitionByRound: {},
-    loadedEventActionsUserNotification: {}
+    loadedEventActionsUserNotification: {},
+    // loadedEventHomeTeamNotifications: [],
+    // loadedEventVisitorTeamNotifications: []
 })
 
 export const mutations = {
@@ -20,7 +22,7 @@ export const mutations = {
         state.loadedEvent = payload
     },
     setEventsByDay(state, payload) {
-        console.log('Call to setEventsByDay mutation', payload)
+        console.log('Call to events/setEventsByDay mutation', payload)
         state.loadedEventsByDay = payload
         // state.loadedEventsByDay = Object.assign({}, state.loadedEventsByDay, {
         //     [payload.date]: payload
@@ -44,14 +46,30 @@ export const mutations = {
     // },
     // addEventUser(state, payload) {
     // 	state.loadedEventUsers.push(...payload)
+    // },
+    // addEventHomeTeamNotification(state, payload) {
+	// 	const notification = `${payload.username} has ${payload.type === 'user_joined_event' ? 'joined' : 'left'} the game`
+	// 	// state.loadedEventHomeTeamNotifications = []
+	// 	state.loadedEventHomeTeamNotifications.unshift(notification)
 	// },
-	setEventActionsUserNotification (state, payload) {
-		console.log('payload2: ', payload)
-		state.loadedEventActionsUserNotification = payload
-	},
+	// addEventVisitorTeamNotification(state, payload) {
+	// 	const notification = `${payload.username} has ${payload.type === 'user_joined_event' ? 'joined' : 'left'} the game`
+	// 	// state.loadedEventHomeTeamNotifications = []
+	// 	state.loadedEventVisitorTeamNotifications.unshift(notification)
+    // },
+    setEventActionsUserNotification(state, payload) {
+        // console.log('payload2: ', payload)
+        state.loadedEventActionsUserNotification = payload
+    },
     clearEvents(state) {
         state.loadedEvents = {}
-    }
+	},
+	// clearEventHomeTeamNotifications(state) {
+    //     state.loadedEventHomeTeamNotifications = []
+	// },
+	// clearEventVisitorTeamNotifications(state) {
+	// 	state.loadedEventVisitorTeamNotifications = []
+	// }
 }
 
 export const actions = {
@@ -68,67 +86,55 @@ export const actions = {
                         commit('setEvent', event)
                         resolve()
                     })
+
+                // Also add a listener
+                // firebase
+                //     .database()
+                //     .ref(`events/${payload}`)
+                //     .on('child_added', function(data) {
+                //         console.log('CHILD ADDED! ', data)
+                //     })
+                // firebase
+                //     .database()
+                //     .ref(`events/${payload}`)
+                //     .on('child_removed', function(data) {
+                //         console.log('CHILD REMOVED! ', data)
+                //     })
             } catch (error) {
                 console.log('error: ', error)
                 reject(error)
             }
         })
     },
-    async loadedEvents({ commit }) {
-        return new Promise((resolve, reject) => {
-            try {
-                firebase
-                    .database()
-                    .ref('/events_new3/')
-                    .on('value', function(snapshot) {
-                        const eventsArray = []
-                        for (const key in snapshot.val()) {
-                            eventsArray.push({
-                                ...snapshot.val()[key],
-                                id: key
-                            })
-                        }
-                        commit('setEvents', eventsArray)
-                        resolve(eventsArray)
-                    })
-            } catch (error) {
-                console.log(error)
-                new Noty({
-                    type: 'error',
-                    text: 'Events not found',
-                    timeout: 5000,
-                    theme: 'metroui'
-                }).show()
-                commit('setError', error, { root: true })
-                commit('setLoading', false, { root: true })
-                reject(error)
-            }
-        })
-    },
     fetchEventsByDay({ commit }, payload) {
-        try {
-            console.log('fetchEventsByDay: ', payload)
-            firebase
-                .database()
-                .ref('/events/')
-                .orderByChild('date')
-                .equalTo(payload)
-                .on('value', function(snapshot) {
-                    const eventsArray = []
-                    snapshot.forEach(event => {
-                        eventsArray.push({ ...event.val(), id: event.key })
-                    })
-                    const sortedEventsArray = eventsArray.sort((a, b) => a.timestamp - b.timestamp)
-                    // const events = { date: date, events: sortedEventsArray }
-                    const events = { [payload]: sortedEventsArray }
-                    commit('setEventsByDay', events)
-                })
-        } catch (error) {
-            console.log('error: ', error)
-            throw error
-        }
+		return new Promise((resolve, reject) => {
+			try {
+				console.log('fetchEventsByDay: ', payload)
+				firebase
+					.database()
+					.ref('/events/')
+					.orderByChild('date')
+					.equalTo(payload)
+					.on('value', function(snapshot) {
+						const eventsArray = []
+						snapshot.forEach(event => {
+							if (event.val().competition_active !== false) {
+								eventsArray.push({ ...event.val(), id: event.key })
+							}
+						})
+						const sortedEventsArray = eventsArray.sort((a, b) => a.timestamp - b.timestamp)
+						// const events = { date: date, events: sortedEventsArray }
+						const events = { [payload]: sortedEventsArray }
+						console.log('events: ', events)
+						commit('setEventsByDay', events)
+						resolve()
+					})
+			} catch (error) {
+				console.log('error: ', error)
+				reject(error)
+			}
+		})
     },
-
     loadedCompetitionEvents({ commit }, payload) {
         // console.log('payload: ', payload)
         const competitionId = parseInt(payload.livescore_api_id)
@@ -233,24 +239,53 @@ export const actions = {
     // 		}
     //     })
     // },
-    addUserToEvent({ commit, rootGetters }, payload) {
+    async addUserToEvent({ commit, rootGetters }, payload) {
         try {
             console.log('addUserToEvent: ', payload)
             const user = rootGetters['users/loadedUser']
-            console.log('user: ', user)
-            firebase
-                .database()
-                .ref(`/events/${payload}/users`)
-                .child(user.id)
-                .set({
-                    id: user.id,
-                    username: user.username || null,
-                    picture: user.picture || null,
-                    level: user.level ? user.level.value : ''
-                })
+			console.log('user: ', user)
+			let updates = {}
+
+			updates[`/events/${payload.eventId}/users/${user.id}`] = {
+				id: user.id,
+				username: user.username || null,
+				picture: user.picture || null,
+				level: user.level ? user.level.value : '',
+				team: payload.teamId,
+				active: true
+			}
+
+			// Provide a notification to the rest of the players
+			if (payload['isFanHomeTeam']) {
+				updates[`/events/${payload.eventId}/homeTeam_notification`] = `${user.username} has joined the game`
+			} else {
+				updates[`/events/${payload.eventId}/visitorTeam_notification`] = `${user.username} has joined the game`
+			}
+			firebase.database().ref().update(updates)
+			
         } catch (error) {
             console.log('error: ', error)
             throw error
+        }
+    },
+    async removeUserFromEvent({ commit }, payload) {
+        try {
+			console.log('removeUserFromEvent: ', payload)
+			let updates = {}
+
+			updates[`/events/${payload.eventId}/users/${payload.user.id}/active`] = false
+
+			// Provide a notification to the rest of the players
+			if (payload['isFanHomeTeam']) {
+				updates[`/events/${payload.eventId}/homeTeam_notification`] = `${payload.user.username} left the game`
+			} else {	
+				updates[`/events/${payload.eventId}/visitorTeam_notification`] = `${payload.user.username} left the game`
+			}
+			firebase.database().ref().update(updates)
+			
+        } catch (error) {
+			console.log('error: ', error)
+			throw error
         }
     },
     async addActionToEvent({ commit, rootGetters }, payload) {
@@ -261,11 +296,11 @@ export const actions = {
 
             // 1) Generate a random ID that, for ordering purposes, is the remaining seconds until December 1st, 2050 and today appended by a random number between 1 and 1000
             const newNode = 2553465600 - moment().unix() + '_' + Math.floor(Math.random() * 1000)
-			// const newNode = moment().add(10, 'years').unix() - moment().unix() + '_' + Math.floor(Math.random() * 1000)
-			
-			// 2) Add new action to event node
-			delete payload.action.id
-			const min_participants_count = Math.ceil((payload.usersCount * payload.action.min_participants_percent || 0) / 100)
+            // const newNode = moment().add(10, 'years').unix() - moment().unix() + '_' + Math.floor(Math.random() * 1000)
+
+            // 2) Add new action to event node
+            delete payload.action.id
+            const min_participants_count = Math.ceil((payload.usersCount * payload.action.min_participants_percent || 0) / 100)
             await firebase
                 .database()
                 .ref(`/events/${payload.eventId}/actions/${newNode}`)
@@ -273,40 +308,41 @@ export const actions = {
                     id: newNode,
                     userId: user.id,
                     username: user.username,
-					_created_at: moment().unix(),
 					usersCount: 1,
-					users: {
+					completed: false,
+                    users: {
 						[user.id]: {
 							userId: user.id,
-							username: user.username,
-							picture: user.picture
-						}
-					},
-					min_participants_count,
-					// progress: 0,
-					// completed: false,
+                            username: user.username,
+                            picture: user.picture
+                        }
+                    },
+					_created_at: moment().unix(),
+                    min_participants_count,
+                    // progress: 0,
+                    // completed: false,
                     ...payload.action
-				})
-				
-			// 3) Also, add a listener to be notified when users join in
-			firebase
+                })
+
+            // 3) Also, add a listener to be notified when users join in
+            firebase
                 .database()
                 .ref(`events/${payload.eventId}/actions/${newNode}/users`)
                 .on('child_added', function(data) {
-					let user = data.val()
-					console.log('user: ', user)
-					user.action = payload.action['name']
-					console.log('CHILD ADDED! ', user)
-					if (user.userId !== rootGetters['users/loadedUser'].id) {
-						commit('setEventActionsUserNotification', user)
-						new Noty({
-							type: 'info',
-							text: `${user.username} has joined your action.`,
-							timeout: 5000,
-							theme: 'metroui'
-						}).show()
-					}
-				})
+                    let user = data.val()
+                    console.log('user: ', user)
+                    user.action = payload.action['name']
+                    console.log('CHILD ADDED! ', user)
+                    if (user.userId !== rootGetters['users/loadedUser'].id) {
+                        commit('setEventActionsUserNotification', user)
+                        new Noty({
+                            type: 'info',
+                            text: `${user.username} has joined your action.`,
+                            timeout: 5000,
+                            theme: 'metroui'
+                        }).show()
+                    }
+                })
         } catch (error) {
             console.log('error: ', error)
             throw error
@@ -314,28 +350,28 @@ export const actions = {
     },
     joinAction({ commit, rootGetters }, payload) {
         try {
-			console.log('payload: ', payload)
-			const user = rootGetters['users/loadedUser']
+            console.log('joinAction: ', payload)
+            const user = rootGetters['users/loadedUser']
             const userId = user.id
 
-			// 1) Add user to action
-			let updates = {}
-			
-			firebase.database().ref(`/events/${payload.eventId}/actions/${payload.action.id}/users`).update({
-				[userId]: { userId, username: user.username, picture: user.picture }})
-				
-			if (payload.usersCount + 1 >= payload.action.min_participants_count) {
-				firebase.database().ref(`/events/${payload.eventId}/actions/${payload.action.id}`).update({ completed: true })
-			}
+            // 1) Add user to action
+            let updates = {}
 
-			firebase.database().ref().update(updates)
+			updates[`/events/${payload.eventId}/actions/${payload.action.id}/users/${userId}`] = { userId, username: user.username, picture: user.picture }
 			
-            // firebase
-            //     .database()
-            //     .ref(`/events/${payload.eventId}/actions/${payload.actionId}/users`)
-            //     .update({ [userId]: { userId, username: user.username, picture: user.picture } })
+			// 2) Check if action is completed
+            if (payload.usersCount + 1 >= payload.action.min_participants_count) {
+				updates[`/events/${payload.eventId}/actions/${payload.action.id}/completed`] = true
+				updates[`/events/${payload.eventId}/homeTeam_pf`] = payload.homeTeam_pf + (payload.action.gain_pf / 2)
+				updates[`/events/${payload.eventId}/visitorTeam_pf`] = payload.visitorTeam_pf + (payload.action.gain_pf / 2)
+            }
 
-            // 2) Update action counter
+            firebase
+                .database()
+                .ref()
+                .update(updates)
+
+            // 3) Update action users counter
             firebase
                 .database()
                 .ref(`events/${payload.eventId}/actions/${payload.action.id}`)
@@ -348,28 +384,26 @@ export const actions = {
                         }
                     }
                     return action
-				})
-			
-			
+                })
         } catch (error) {
             throw error
         }
-    },
+    }
     // updateEventAction({ commit }, payload) {
-	// 	try {
-	// 		console.log('updateEventAction: ', payload)
+    // 	try {
+    // 		console.log('updateEventAction: ', payload)
 
-	// 		let updates = {}
-	// 		updates[`/events/${payload.eventId}/actions/${payload.actionId}/completed`] = true
-	// 		firebase
+    // 		let updates = {}
+    // 		updates[`/events/${payload.eventId}/actions/${payload.actionId}/completed`] = true
+    // 		firebase
     //             .database()
     //             .ref()
-	// 			.update(updates)
-							
+    // 			.update(updates)
+
     //     } catch (error) {
     //         throw error
     //     }
-	// }
+    // }
 }
 
 export const getters = {
@@ -384,8 +418,14 @@ export const getters = {
     },
     // loadedEventUsers(state) {
     //     return state.loadedEventUsers
-	// }
-	loadedEventActionsUserNotification(state) {
-		return state.loadedEventActionsUserNotification
-	}
+    // }
+    loadedEventActionsUserNotification(state) {
+        return state.loadedEventActionsUserNotification
+    },
+    // loadedEventHomeTeamNotifications(state) {
+    //     return state.loadedEventHomeTeamNotifications
+	// },
+	// loadedEventVisitorTeamNotifications(state) {
+    //     return state.loadedEventVisitorTeamNotifications
+    // }
 }

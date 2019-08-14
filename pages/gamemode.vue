@@ -6,6 +6,10 @@
                 <!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
                 <!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
                 <!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
+                loadedUserTeams: {{ loadedUserTeams }}<br /><br />
+                <transition name="slide" mode="out-in">
+                    <div :key="waiting">waiting: {{ waiting }}</div>
+                </transition>
 
                 <gamemode-header />
 
@@ -107,10 +111,15 @@
 	export default {
 		components: { GamemodeHeader },
 		layout: 'layoutGamemode',
+		asyncData(context) {
+			console.log('asyncData: ', context)
+		},
 		async created() {
 			await this.changeConfederation()
 			try {
+				// if (!this.loadedUserTeams.length) {
 				await this.$store.dispatch('userTeams/fetchUserTeams')
+				// }
 			} catch (error) {
 				console.log('error from created: ', error)
 			}
@@ -124,7 +133,7 @@
 				active_competition_tab: 0,
 				selectedConfederation: {},
 				selectedCountry: {},
-				selectedCompetition: {}
+				selectedCompetition: {},
 			}
 		},
 		computed: {
@@ -286,12 +295,21 @@
 					}).show()
 				} catch (error) {
 					console.log('error: ', error)
-					new Noty({
-						type: 'error',
-						text: `Sorry, an error occured and you could not follow ${team.name} &#128533;`,
-						timeout: 5000,
-						theme: 'metroui'
-					}).show()
+					if (error === 'team_already_picked') {
+						new Noty({
+							type: 'warning',
+							text: `You are already fan of ${team.name} &#128527;`,
+							timeout: 5000,
+							theme: 'metroui'
+						}).show()
+					} else {
+						new Noty({
+							type: 'error',
+							text: `Sorry, an error occured and you could not follow ${team.name} &#128533;`,
+							timeout: 5000,
+							theme: 'metroui'
+						}).show()
+					}
 				}
 			},
 			async deselectTeam(team) {
@@ -346,8 +364,5 @@
 	.selected {
 		/* background: yellow; */
 		background: var(--v-primary-lighten4);
-	}
-	.def {
-		background-color: orange;
 	}
 </style>

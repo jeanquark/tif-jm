@@ -180,13 +180,24 @@ export const actions = {
     },
 
     // Update a competition
-    async updateCompetition({ commit, dispatch }, payload) {
+    async toggleCompetitionActiveStatus({ commit, dispatch }, payload) {
         try {
             console.log(payload)
             payload['_updated_at'] = moment().unix()
 
             let updates = {}
-            updates[`/competitions/${payload.slug}`] = payload
+			// 1) Update all events that are part of the competition
+			const competitionEvents = await firebase.database().ref('/events').orderByChild('competition_slug').equalTo(payload.slug).once('value')
+			competitionEvents.forEach(event => {
+				// console.log('event.val(): ', event.val())
+				if (event.val().competition_active) {
+					updates[`/events/${event.key}/competition_active`] = false
+				} else {
+					updates[`/events/${event.key}/competition_active`] = true
+				}
+			})
+			// 2) Update competitions node
+			updates[`/competitions/${payload.slug}`] = payload
 
             await firebase
                 .database()

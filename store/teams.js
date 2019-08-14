@@ -71,13 +71,14 @@ export const actions = {
 						})
 					})
                     // console.log('teamsArray: ', teamsArray)
-                    const orderedTeams = teamsArray.sort(
-                        (a, b) => parseInt(b.usersCount || 0) - parseInt(a.usersCount || 0)
-					)
+                    // const orderedTeams = teamsArray.sort(
+                    //     (a, b) => parseInt(b.usersCount || 0) - parseInt(a.usersCount || 0)
+					// )
 					// console.log('orderedTeams: ', orderedTeams)
                     commit('setTeamsByCompetition', {
                         competition: payload,
-                        teams: orderedTeams
+						// teams: orderedTeams
+						teams: teamsArray
                     })
                     resolve()
                 })

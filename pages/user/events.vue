@@ -4,7 +4,10 @@
             <v-flex xs12 style="background: #EEEEEE;">
 
                 <gamemode-header />
-
+				
+				<!-- loadedAllEventsByDay: {{ loadedAllEventsByDay }}<br /> -->
+				loadedUserTeams: {{ loadedUserTeams }}<br /><br />
+				
                 <v-layout row wrap justify-center style="border: 2px solid green;">
                     <v-flex xs12>
                         <!-- Days tabs -->
@@ -92,7 +95,10 @@
 		layout: 'layoutGamemode',
 		created() {
 			const today = moment().format('YYYY-MM-DD')
-			this.$store.dispatch('events/fetchEventsByDay', today)
+			// if (!this.loadedAllEventsByDay[today]) {
+				console.log('fetchEventsByDay')
+				this.$store.dispatch('events/fetchEventsByDay', today)
+			// }
 		},
 		data() {
 			return {
@@ -111,7 +117,9 @@
 				const day = moment()
 					.add(this.days[this.active_day_tab], 'days')
 					.format('YYYY-MM-DD')
-				this.$store.dispatch('events/fetchEventsByDay', day)
+				if (!this.$store.getters['events/loadedEventsByDay'][day]) {
+					this.$store.dispatch('events/fetchEventsByDay', day)
+				}
 				return this.$store.getters['events/loadedEventsByDay'][day]
 			},
 			loadedUserEventsByDay() {
