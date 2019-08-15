@@ -6,7 +6,7 @@
                 <gamemode-header />
 				
 				<!-- loadedAllEventsByDay: {{ loadedAllEventsByDay }}<br /> -->
-				loadedUserTeams: {{ loadedUserTeams }}<br /><br />
+				<!-- loadedUserTeams: {{ loadedUserTeams }}<br /><br /> -->
 				
                 <v-layout row wrap justify-center style="border: 2px solid green;">
                     <v-flex xs12>

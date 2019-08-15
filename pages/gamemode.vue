@@ -6,10 +6,7 @@
                 <!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
                 <!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
                 <!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
-                loadedUserTeams: {{ loadedUserTeams }}<br /><br />
-                <transition name="slide" mode="out-in">
-                    <div :key="waiting">waiting: {{ waiting }}</div>
-                </transition>
+                <!-- loadedUserTeams: {{ loadedUserTeams }}<br /><br /> -->
 
                 <gamemode-header />
 

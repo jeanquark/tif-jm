@@ -200,9 +200,12 @@
 		beforeRouteLeave(to, from, next) {
 			console.log('to: ', to)
 			console.log('from: ', from)
+
 			// Set inactive user
-			const isFanHomeTeam = this.loadedEvent['users'][this.loadedUser.id]['team'] === this.loadedEvent.homeTeam_slug
-			this.$store.dispatch('events/removeUserFromEvent', { eventId: this.loadedEvent.id, user: this.loadedUser, isFanHomeTeam })
+			if (this.loadedEvent['users'] && this.loadedEvent['users'][this.loadedUser.id]) {
+				const isFanHomeTeam = this.loadedEvent['users'][this.loadedUser.id]['team'] === this.loadedEvent.homeTeam_slug
+				this.$store.dispatch('events/removeUserFromEvent', { eventId: this.loadedEvent.id, user: this.loadedUser, isFanHomeTeam })
+			}
 			next()
 		},
 		components: { GamemodeHeader, SelectSide, EventAction },
