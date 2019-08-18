@@ -23,10 +23,10 @@ export const mutations = {
     },
     setEventsByDay(state, payload) {
         console.log('Call to events/setEventsByDay mutation', payload)
-        state.loadedEventsByDay = payload
-        // state.loadedEventsByDay = Object.assign({}, state.loadedEventsByDay, {
-        //     [payload.date]: payload
-        // })
+        // state.loadedEventsByDay = payload
+        state.loadedEventsByDay = Object.assign({}, state.loadedEventsByDay, {
+            [payload.date]: payload.events
+		})
     },
     setEventsByCompetitionByRound(state, payload) {
         console.log('payload2: ', payload)
@@ -107,6 +107,7 @@ export const actions = {
         })
     },
     fetchEventsByDay({ commit }, payload) {
+		console.log('fetchEventsByDay action: ', payload)
 		return new Promise((resolve, reject) => {
 			try {
 				console.log('fetchEventsByDay: ', payload)
@@ -124,7 +125,7 @@ export const actions = {
 						})
 						const sortedEventsArray = eventsArray.sort((a, b) => a.timestamp - b.timestamp)
 						// const events = { date: date, events: sortedEventsArray }
-						const events = { [payload]: sortedEventsArray }
+						const events = { date: payload, events: sortedEventsArray }
 						console.log('events: ', events)
 						commit('setEventsByDay', events)
 						resolve()
@@ -134,7 +135,36 @@ export const actions = {
 				reject(error)
 			}
 		})
-    },
+	},
+	fetchEventsByCompetitionByRound({ commit }, payload) {
+		console.log('fetchEventsByCompetitionByRound: ', payload)
+		return new Promise((resolve, reject) => {
+			try {
+				firebase
+					.database()
+					.ref('/events/')
+					.orderByChild('competition_round')
+					.equalTo('switzerland_super_league_2019_2020_1')
+					.on('value', function(snapshot) {
+						const eventsArray = []
+						snapshot.forEach(event => {
+							if (event.val().competition_active !== false) {
+								eventsArray.push({ ...event.val(), id: event.key })
+							}
+						})
+						const sortedEventsArray = eventsArray.sort((a, b) => a.timestamp - b.timestamp)
+						// const events = { date: date, events: sortedEventsArray }
+						const events = { date: payload, events: sortedEventsArray }
+						console.log('events: ', events)
+						commit('setEventsByCompetitionRound', events)
+						resolve()
+					})
+			} catch (error) {
+				console.log('error: ', error)
+				reject(error)
+			}
+		})
+	},
     loadedCompetitionEvents({ commit }, payload) {
         // console.log('payload: ', payload)
         const competitionId = parseInt(payload.livescore_api_id)

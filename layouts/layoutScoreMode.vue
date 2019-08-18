@@ -64,7 +64,7 @@
 	}
 </script>
 
-<style>
+<style scoped>
 	/* #app {
 		font: normal 100%/1 "Acme", Helvetica, sans-serif;
 	} */
