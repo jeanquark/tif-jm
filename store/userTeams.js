@@ -16,6 +16,7 @@ export const mutations = {
 
 export const actions = {
     fetchUserTeams({ commit, rootGetters }) {
+		console.log('fetchUserTeams action called')
         return new Promise((resolve, reject) => {
 			try {
 				const userId = rootGetters['users/loadedUser'].id

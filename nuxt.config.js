@@ -133,13 +133,17 @@ module.exports = {
             handler: '~/serverMiddleware/registerNewUser'
         },
         {
-            path: '/subscriptions/fetch-subscriptions',
-            handler: '~/serverMiddleware/subscriptions/fetchSubscriptions'
+            path: '/push-notifications/fetch-subscriptions',
+            handler: '~/serverMiddleware/pushNotifications/fetchSubscriptions'
         },
         {
-            path: '/subscriptions/create-subscription',
-            handler: '~/serverMiddleware/subscriptions/createSubscription'
+            path: '/push-notifications/create-subscription',
+            handler: '~/serverMiddleware/pushNotifications/createSubscription'
         },
+		{
+			path: '/push-notifications/send-notifications',
+			handler: '~/serverMiddleware/pushNotifications/sendNotifications'
+		},
         {
             path: '/update-user-tokens',
             handler: '~/serverMiddleware/updateUserTokens'
@@ -147,10 +151,6 @@ module.exports = {
         {
             path: '/move-old-events',
             handler: '~/serverMiddleware/moveOldEvents'
-        },
-        {
-            path: '/subscriptions/send-notifications',
-            handler: '~/serverMiddleware/subscriptions/sendNotifications'
         },
         // {
         //     path: "/api/fetch-past-premier-league-matches",

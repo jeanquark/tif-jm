@@ -24,7 +24,7 @@ module.exports = app.use(async function(req, res, next) {
       vapidPrivateKey
     );
 
-    // 1) First get all events where notification_sent is false & are finished
+    // 1) First get all events that are finished & where notification_sent is false
     const snapshot = await admin
       .database()
       .ref("/events/")

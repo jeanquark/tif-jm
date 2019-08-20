@@ -17,8 +17,8 @@ module.exports = app.use(async function(req, res, next) {
         let teamsArray = [];
         let updates = {};
 
-        admin.database().ref('/subscriptions').orderByChild('endpoint').equalTo(currentEndpoint).once('value', function ())
-      .update(updates)
+    //     admin.database().ref('/subscriptions').orderByChild('endpoint').equalTo(currentEndpoint).once('value', function ())
+    //   .update(updates)
 
 
 

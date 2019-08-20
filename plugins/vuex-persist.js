@@ -5,6 +5,7 @@ export default ({ store }) => {
     new VuexPersistence({
 		reducer: state => ({
 			// user: state.user,
+			userTeams: state.userTeams
 		})
     }).plugin(store);
   });

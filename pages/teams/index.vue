@@ -1,914 +1,368 @@
 <template>
-    <v-content id="app" style="background-color: white">
-        <v-container style="padding: 0; max-width: 1017px;">
-        
-            <scoremode-header />
+    <v-container fluid fill-height style="padding: 0px; max-width: 1017px;">
+        <v-layout align-center justify-center>
+            <v-flex xs12 style="background: #EEEEEE;">
+                <!-- loadedCountriesByConfederation: {{ loadedCountriesByConfederation }}<br /><br /> -->
+                <!-- loadedCompetitionsByCountry: {{ loadedCompetitionsByCountry }}<br /><br /> -->
+                <!-- loadedTeamsByCompetition: {{ loadedTeamsByCompetition }}<br /><br /> -->
+                <!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
+                <!-- loadedUserTeams: {{ loadedUserTeams }}<br /><br /> -->
 
-            <!-- Scrollable content -->
-            <div class="content" style="height: 100vh; border-right: 1px solid orangered; border-left: 1px solid orangered; padding: 10px 0">
-                <v-layout>
-                        
-                    <!-- Scrollable content -->
-                    <div style="padding: 0; min-width: 100%; height: 100%">     
+                <gamemode-header />
 
-                        <div fluid style="padding: 0; max-width: 1000px; background-color: black; color: white; style: 30px">
-                            <v-layout>
-                                <v-flex d-flex x12 justify-center align-center class="text-xs-center menuSport">
-                                    Football - Equipes
-                                </v-flex>
-                            </v-layout>             
-                        </div>
-
-                        <v-layout row fill-height>
-                            <v-flex xs12 align-center class="scrolling-wrapper-flexbox" style="padding: 10px 0; margin-left: 10px; margin-right: 10px">
-                              <div class="cardMenuCompetition" :class="[type === 'club' ? 'active' : '']" @click="teamsByType('club')"><h2>Clubs</h2></div>
-                              <div class="cardMenuCompetition" :class="[type === 'national_team' ? 'active' : '']" @click="teamsByType('national_team')"><h2>Sélections</h2></div>
-            				  <div class="cardMenuCompetition" :class="[continent === 'europe' ? 'active' : '']" @click="teamsByContinent('europe')"><h2>Europe</h2></div>
-            				  <div class="cardMenuCompetition" :class="[continent === 'africa' ? 'active' : '']" @click="teamsByContinent('africa')"><h2>Afrique</h2></div>
-            				  <div class="cardMenuCompetition" :class="[continent === 'america' ? 'active' : '']" @click="teamsByContinent('america')"><h2>Amérique</h2></div>
-            				  <div class="cardMenuCompetition" :class="[continent === 'asia' ? 'active' : '']" @click="teamsByContinent('asia')"><h2>Asie/Océanie</h2></div>
-            				</v-flex>
-                        </v-layout>             
-
-                        <div style="padding: 0; background-color: whitesmoke">
-                            <v-card-text class="card-text" style="padding: 0">
-                                <v-expansion-panel class="elevation-0" :value="0" v-if="loadedUser" style="padding: 0">
-                                    <v-expansion-panel-content style="background-color: orangered">
-                                        <div slot="header" class="white--text">
-                                            MES EQUIPES FAVORITES
-                                        </div>
-                                        <v-icon slot="actions" color="white">$vuetify.icons.expand</v-icon>
-                                        <v-card>
-                                            <v-card-text style="padding: 0">
-                                                <v-data-table :items="teamsFiltered(this.type, this.continent)" class="elevation-0" hide-actions hide-headers>
-                                                    <template slot="items" slot-scope="props" style="height: 15px; border-spacing: 0; padding: 2px; border-top: 1px solid black">
-                                                        <v-layout align-center style="padding: 0; border-right: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black; border-top: 1px solid black">
-                                                            <v-flex xs12 style="margin: 0; padding-top: 2px; padding-bottom: 2px; height: 100%">
-                                                                <v-layout align-start v-if="props.item.active">
-                                                                    <v-flex class="text-xs-left" style="width: 4px; padding-left: 2px; padding-right: 2px; height: 15px; margin: 0">
-                                                                        <div style="background-color: green; height: 100%; width: 2px"></div>
-                                                                    </v-flex>
-                                                                    <v-flex class="text-xs-left" style="width: 100%; padding: 0; height: 15px; margin: 0">
-                                                                        <div style="color: orange;font-size: 80%">
-                                                                            <span style="float: left; background-color: green; color: white; text-align: center; padding-left: 5px; padding-right: 5px; margin-right: 5px" >OUVERT</span>
-                                                                        </div>
-                                                                    </v-flex>
-                                                                </v-layout>
-                                                                <v-layout align-start v-if="!props.item.active">
-                                                                    <v-flex class="text-xs-left" style="width: 4px; padding-left: 2px; padding-right: 2px; height: 15px; margin: 0">
-                                                                        <div style="background-color: red; height: 100%; width: 2px"></div>
-                                                                    </v-flex>
-                                                                    <v-flex class="text-xs-left" style="width: 100%; padding: 0; height: 15px; margin: 0">
-                                                                        <div style="color: orange;font-size: 80%">
-                                                                            <span style="float: left; background-color: red; color: white; text-align: center; padding-left: 5px; padding-right: 5px; margin-right: 5px" >BIENTÔT</span>
-                                                                        </div>
-                                                                    </v-flex>
-                                                                </v-layout>
-                                                                <v-layout align-center style="max-width: 100%">
-                                                                    <v-flex class="text-xs-left" style="width: 4px; padding-left: 2px; padding-right: 2px; height: 40px; margin: 0">
-                                                                        <div :class="[props.item.active ? 'greenBar' : 'redBar']"></div>
-                                                                    </v-flex>
-                                                                    <v-flex sm4 xs5 align-center class="text-xs-left pd-left10">
-                                                                        <nuxt-link :to="'/teams/' + props.item.id" class="teamTextSize" style="color: black; text-decoration: none">{{ props.item.name }}</nuxt-link>
-                                                                    </v-flex>
-                                                                    <v-flex sm3 hidden-xs-only class="text-xs-right">
-                                                                        Fan de : <span style="background-color: orangered; padding: 2px 10px; border-radius: 5px; font-size: 100%">{{ props.item.nb_teams }} équipes - Fan de : FC Barcelone</span>
-                                                                    </v-flex>
-                                                                    <v-flex sm4 xs5 align-center class="text-xs-right" style="width: 50px; padding-right: 15px">
-                                                                        <span style="background-color: black; color: orange; padding: 2px 10px; border-radius: 5px; font-size: 100%">Nb fans liés à la compétition</span>
-                                                                    </v-flex>
-                                                                </v-layout>
-                                                            </v-flex>
-                                                        </v-layout>
-                                                    </template>
-                                                </v-data-table>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-expansion-panel-content>
-                                </v-expansion-panel>
-                            </v-card-text>
-                            
-                                <v-card-text class="card-text" style="padding: 0">
-                                <v-expansion-panel class="elevation-0" :value="0">
-                                    <v-expansion-panel-content style="background-color: green">
-                                        <div slot="header" class="white--text">
-                                           TOUTES LES EQUIPES
-                                        </div>
-                                        <v-icon slot="actions" color="white">$vuetify.icons.expand</v-icon>
-                                        <v-card>
-                                            <v-card-text style="padding: 0">
-                                                <v-data-table :items="teamsFiltered(this.type, this.continent)" class="elevation-0" hide-actions hide-headers>
-                                                    <template slot="items" slot-scope="props" style="height: 15px; border-spacing: 0; padding: 2px; border-top: 1px solid black">
-                                                        <v-layout align-center style="padding: 0; border-right: 1px solid black; border-left: 1px solid black; border-bottom: 1px solid black; border-top: 1px solid black">
-                                                            <v-flex xs12 style="margin: 0; padding-top: 2px; padding-bottom: 2px; height: 100%">
-                                                                <v-layout align-start v-if="props.item.active">
-                                                                    <v-flex class="text-xs-left" style="width: 4px; padding-left: 2px; padding-right: 2px; height: 15px; margin: 0">
-                                                                        <div style="background-color: green; height: 100%; width: 2px"></div>
-                                                                    </v-flex>
-                                                                    <v-flex class="text-xs-left" style="width: 100%; padding: 0; height: 15px; margin: 0">
-                                                                        <div style="color: orange;font-size: 80%">
-                                                                            <span style="float: left; background-color: green; color: white; text-align: center; padding-left: 5px; padding-right: 5px; margin-right: 5px" >OUVERT</span>
-                                                                        </div>
-                                                                    </v-flex>
-                                                                </v-layout>
-                                                                <v-layout align-start v-if="!props.item.active">
-                                                                    <v-flex class="text-xs-left" style="width: 4px; padding-left: 2px; padding-right: 2px; height: 15px; margin: 0">
-                                                                        <div style="background-color: red; height: 100%; width: 2px"></div>
-                                                                    </v-flex>
-                                                                    <v-flex class="text-xs-left" style="width: 100%; padding: 0; height: 15px; margin: 0">
-                                                                        <div style="color: orange;font-size: 80%">
-                                                                            <span style="float: left; background-color: red; color: white; text-align: center; padding-left: 5px; padding-right: 5px; margin-right: 5px" >BIENTÔT</span>
-                                                                        </div>
-                                                                    </v-flex>
-                                                                </v-layout>
-                                                                <v-layout align-center style="max-width: 100%">
-                                                                    <v-flex class="text-xs-left" style="width: 4px; padding-left: 2px; padding-right: 2px; height: 40px; margin: 0">
-                                                                        <div :class="[props.item.active ? 'greenBar' : 'redBar']"></div>
-                                                                    </v-flex>
-                                                                    <v-flex sm1 xs2 align-center class="text-xs-left pd-left10">
-                                                                        <nuxt-link :to="'/teams/' + props.item.id" class="teamTextSize" style="color: black; text-decoration: none"><img :src="'/images/teams/' + props.item.image" :lazy-src="'/images/icon.png'" class="imgTeamLogo"/></nuxt-link>
-                                                                    </v-flex>                                                                    
-                                                                    <v-flex sm5 xs5 align-center class="text-xs-left">
-                                                                        <nuxt-link :to="'/teams/' + props.item.id" class="teamTextSize" style="color: black; text-decoration: none">{{ props.item.name }} <span style="font-size: 0.8em">({{ props.item.gender.name }})</span></nuxt-link>
-                                                                    </v-flex>
-                                                                    <v-flex sm3 hidden-xs-only class="text-xs-right">
-                                                                        <span style="background-color: orangered; color: white; padding: 2px 10px; border-radius: 5px; font-size: 100%">Devenir fan ?</span>
-                                                                    </v-flex>
-                                                                    <v-flex sm3 xs5 align-center class="text-xs-right" style="width: 50px; padding-right: 15px">
-                                                                        <span style="background-color: black; color: orange; padding: 2px 10px; border-radius: 5px; font-size: 100%">123'456 fans</span>
-                                                                    </v-flex>
-                                                                </v-layout>
-                                                            </v-flex>
-                                                        </v-layout>
-                                                    </template>
-                                                </v-data-table>
-                                            </v-card-text>
-                                        </v-card>
-                                    </v-expansion-panel-content>
-                                </v-expansion-panel>
-                            </v-card-text>
-                        </div>
-
-                    </div>
-                    
+                <!-- <div class="content"> -->
+                <v-layout row wrap justify-center align-center class="my-4" style="">
+                    <v-flex xs4 offset-xs2 class="text-xs-center">
+                        <v-text-field name="username" label="Username" type="text" v-model="loadedUser.username"></v-text-field>
+                    </v-flex>
+                    <v-flex xs4>
+                        <v-btn small color="success" @click.stop="updateUsername">Update username</v-btn>
+                    </v-flex>
+                    <v-flex xs12 class="mb-2 text-xs-center">
+                        <h2>My Teams</h2>
+                    </v-flex>
+                    <v-flex xs12 sm6 md4 lg3 class="ma-2" v-for="team in loadedUserTeams" :key="team.slug">
+                        <v-card class="ma-3 pt-2">
+                            <v-img :src="`/images/teams/${team.image}`" :lazy-src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4 pa-2"></v-img>
+                            <v-card-actions>
+                                <v-layout row wrap justify-center align-center>
+                                    <v-flex xs12 class="text-xs-center">
+                                        {{ team.name }}
+                                    </v-flex>
+                                    <!-- <v-flex xs3 class="text-xs-right">
+										<v-layout align-center>
+											<img src="/images/icons/icon_48x48.png" width="20" />
+											<span class="ml-2">{{ team.usersCount || 0 }}</span>
+										</v-layout>
+									</v-flex> -->
+                                    <v-btn small color="primary" class="mt-2" @click.stop="deselectTeam(team)">Deselect</v-btn>
+                                </v-layout>
+                            </v-card-actions>
+                        </v-card>
+                    </v-flex>
                 </v-layout>
-                        
-            </div>
 
-            <scoremode-footer />
-            
-        </v-container>
-    </v-content>
+                <v-layout row wrap>
+                    <v-flex xs12>
+                        <!-- Confederations tabs -->
+                        <v-tabs color="yellow" dark slider-color="blue" fixed-tabs v-model="active_confederation_tab" @change="changeConfederation()">
+                            <v-tab v-for="(confederation, index) in confederations" :key="index" ripple style="cursor: pointer;">
+                                <v-img :src="`/images/confederations/${confederation.image}`" :aspect-ratio="1" :max-width="50"></v-img>
+                            </v-tab>
+                        </v-tabs>
+
+                        <!-- Countries tabs -->
+                        <v-tabs color="amber" dark slider-color="blue" fixed-tabs v-model="active_country_tab" style="display: inline;" @change="changeCountry()" v-if="selectedConfederation">
+                            <v-tab v-for="(country, index) in loadedCountriesByConfederation[selectedConfederation.slug]" :key="index" ripple style="cursor: pointer;">
+                                <img :src="`/images/countries/${country.image}`" width="40px" />
+                            </v-tab>
+                        </v-tabs>
+
+                        <!-- Competitions tabs -->
+                        <v-tabs color="orange" dark slider-color="blue" fixed-tabs v-model="active_competition_tab" style="display: inline;" @change="changeCompetition()" v-if="selectedCountry && loadedCompetitionsByCountry[selectedCountry.slug] &&loadedCompetitionsByCountry[selectedCountry.slug].length > 0">
+                            <v-tab v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index" ripple style="cursor: pointer;">
+                                {{ competition.name }}
+                            </v-tab>
+                            <v-tab-item v-for="(competition, index) in loadedCompetitionsByCountry[selectedCountry.slug]" :key="index">
+                                <v-layout row wrap align-center justify-center v-if="selectedCompetition" style="">
+                                    <v-flex xs6 sm4 md3 class="text-xs-center" v-for="team in loadedTeamsByCompetition[selectedCompetition.slug]" :key="team.slug" style="">
+                                        <v-hover>
+                                            <v-card slot-scope="{ hover }" class="card ma-3 pt-2" :class="[loadedUserTeams && loadedUserTeams[team.slug] ? 'selected' : `${hover ? 'hover' : null}`]" @click.stop="selectTeam(team)">
+                                                <!-- {{ team }} -->
+                                                <v-img :src="`/images/teams/${team.image}`" :lazy-src="`/images/teams/${team.image}`" :aspect-ratio="1" class="ma-4"></v-img>
+                                                <v-card-actions class="px-2 py-0 justify-center white--text" style="background: var(--v-primary-base); width: 100%; height: 30px;">
+                                                    <v-layout row wrap align-center>
+                                                        <v-flex xs9 class="text-xs-center">
+                                                            {{ team.name }}
+                                                        </v-flex>
+                                                        <v-flex xs3 class="text-xs-right">
+                                                            <v-layout align-center>
+                                                                <img src="/images/icons/icon_48x48.png" width="20" />
+                                                                <span class="ml-2">{{ team.usersCount || 0 }}</span>
+                                                            </v-layout>
+                                                        </v-flex>
+                                                    </v-layout>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-hover>
+                                    </v-flex>
+                                </v-layout>
+                            </v-tab-item>
+                        </v-tabs>
+                        <v-tabs color="orange" slider-color="orange" class="justify-center" v-else>
+                            <v-layout justify-center align-center class="white--text">
+                                Sorry, no competition found for this country
+                            </v-layout>
+                        </v-tabs>
+                    </v-flex>
+                </v-layout>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <script>
-    import moment from 'moment'
-    import ScoremodeHeader from '~/components/ScoremodeHeader'
-    import ScoremodeFooter from '~/components/ScoremodeFooter'
-    export default {
-        head: {
-            title: 'teams',
-            link: [
-				{ rel: 'stylesheet', href: 'https://fonts.googleapis.com/css?family=Acme' }
-			]
-        },
-        components: { ScoremodeHeader, ScoremodeFooter },
-        layout: 'layoutScoreMode',
-        async created() {
-            this.$store.dispatch('teams/loadedTeams')
-        },
-        data() {
-            return {
-                type: '',
-                continent: 'europe'
-            }
-        },
-        computed: {
-            loadedUser () {
-                return this.$store.getters['users/loadedUser']
-            }
-        },
-        methods: {
-            teamsByType (type) {
-                this.type = type
-                this.continent = ''
-            },
-            teamsByContinent (continent) {
-                this.continent = continent
-                this.type = ''
-            },
-            teamsFiltered (type, continent) {
-                if (type) {
-                    return this.$store.getters['teams/loadedTeams']
-                        .filter(team => (team.type ? team.type === type : ''))
-                }
-                else if (continent) {
-                    return this.$store.getters['teams/loadedTeams']
-                        .filter(team => (team.continent ? team.continent.slug === continent : ''))
-                } else {
-                    return this.$store.getters['teams/loadedTeams']
-                }
-            },
-            resetTeams () {
-                this.type = ''
-                this.continent = ''
-            }
-        }
-    }
+	import GamemodeHeader from '~/components/GamemodeHeader'
+	import Noty from 'noty'
+	import axios from 'axios'
+	export default {
+		components: { GamemodeHeader },
+		layout: 'layoutGamemode',
+		// asyncData(context) {
+		// 	console.log('asyncData: ', context)
+		// },
+		mounted() {
+
+		},
+		async created() {
+			await this.changeConfederation()
+			try {
+				// if (!this.loadedUserTeams.length) {
+				await this.$store.dispatch('userTeams/fetchUserTeams')
+				// }
+			} catch (error) {
+				console.log('error from created: ', error)
+			}
+			// this.$sentry.captureException(new Error('oups, there is an error from the server'))
+			// myUndefinedFunction();
+		},
+		data() {
+			return {
+				active_confederation_tab: 0,
+				active_country_tab: 0,
+				active_competition_tab: 0,
+				selectedConfederation: {},
+				selectedCountry: {},
+				selectedCompetition: {}
+			}
+		},
+		computed: {
+			loadedUser() {
+				return this.$store.getters['users/loadedUser']
+			},
+			loadedUserTeams() {
+				return this.$store.getters['userTeams/loadedUserTeams']
+			},
+			confederations() {
+				return [
+					{
+						name: 'UEFA',
+						slug: 'uefa',
+						continent: {
+							name: 'Europe',
+							slug: 'europe'
+						},
+						image: 'europe.png'
+					},
+					{
+						name: 'CONCACAF',
+						slug: 'concacaf',
+						continent: {
+							name: 'America',
+							slug: 'america'
+						},
+						image: 'north_and_central_america.png'
+					},
+					{
+						name: 'CONMEBOL',
+						slug: 'conmebol',
+						continent: {
+							name: 'America',
+							slug: 'america'
+						},
+						image: 'south_america.png'
+					},
+					{
+						name: 'CAF',
+						slug: 'caf',
+						continent: {
+							name: 'Africa',
+							slug: 'africa'
+						},
+						image: 'africa.png'
+					},
+					{
+						name: 'AFC',
+						slug: 'afc',
+						continent: {
+							name: 'Asia',
+							slug: 'asia'
+						},
+						image: 'asia.png'
+					},
+					{
+						name: 'OFC',
+						slug: 'ofc',
+						continent: {
+							name: 'Oceania',
+							slug: 'oceania'
+						},
+						image: 'oceania.png'
+					}
+				]
+			},
+			loadedCountriesByConfederation() {
+				return this.$store.getters['countries/loadedCountriesByConfederation']
+			},
+			loadedCompetitionsByCountry() {
+				return this.$store.getters['competitions/loadedCompetitionsByCountry']
+			},
+			loadedTeamsByCompetition() {
+				return this.$store.getters['teams/loadedTeamsByCompetition']
+			}
+		},
+		methods: {
+			async changeConfederation() {
+				console.log('changeConfederation')
+
+				this.selectedConfederation = this.confederations[this.active_confederation_tab]
+				if (!this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
+					await this.fetchCountriesByConfederation(this.selectedConfederation.slug)
+				}
+
+				this.active_country_tab = 0
+				this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
+
+				if (!this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
+					await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
+				}
+				this.active_competition_tab = 0
+				this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
+
+				if (this.selectedCompetition && !this.loadedTeamsByCompetition[this.selectedCompetition.slug]) {
+					await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
+				}
+			},
+			async changeCountry() {
+				console.log('changeCountry')
+				if (this.loadedCountriesByConfederation[this.selectedConfederation.slug]) {
+					this.selectedCountry = this.loadedCountriesByConfederation[this.selectedConfederation.slug][this.active_country_tab]
+					if (this.selectedCountry && (!this.loadedCompetitionsByCountry[this.selectedCountry.slug] || this.loadedCompetitionsByCountry[this.selectedCountry.slug].length < 1)) {
+						await this.fetchCompetitionsByCountry(this.selectedCountry.slug)
+					}
+
+					this.active_competition_tab = 0
+					this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
+
+					if (this.selectedCompetition && (!this.loadedTeamsByCompetition[this.selectedCompetition.slug] || this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)) {
+						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
+					}
+				}
+			},
+			async changeCompetition() {
+				console.log('changeCompetition')
+				if (this.loadedCompetitionsByCountry[this.selectedCountry.slug]) {
+					this.selectedCompetition = this.loadedCompetitionsByCountry[this.selectedCountry.slug][this.active_competition_tab]
+					if (this.selectedCompetition && (!this.loadedTeamsByCompetition[this.selectedCompetition.slug] || this.loadedTeamsByCompetition[this.selectedCompetition.slug].length < 1)) {
+						await this.fetchTeamsByCompetition(this.selectedCompetition.slug)
+					}
+				}
+			},
+
+			async fetchCountriesByConfederation(confederationSlug) {
+				try {
+					await this.$store.dispatch('countries/fetchCountriesByConfederation', confederationSlug)
+					console.log('Done fetching countries by confederation. [fetchCountriesByConfederation]')
+				} catch (error) {
+					console.log('error: ', error)
+				}
+			},
+			async fetchCompetitionsByCountry(countrySlug) {
+				try {
+					await this.$store.dispatch('competitions/fetchCompetitionsByCountry', countrySlug)
+					console.log('Done fetching competitions by country. [fetchCompetitionsByCountry]')
+				} catch (error) {
+					console.log('error: ', error)
+				}
+			},
+			async fetchTeamsByCompetition(competitionSlug) {
+				try {
+					await this.$store.dispatch('teams/fetchTeamsByCompetition', competitionSlug)
+					console.log('Done fetching teams by competition. [fetchTeamsByCompetition]')
+				} catch (error) {
+					console.log('error: ', error)
+				}
+			},
+			async selectTeam(team) {
+				try {
+					console.log('selectTeam: ', team)
+					await this.$store.dispatch('userTeams/selectUserTeam', team)
+					new Noty({
+						type: 'success',
+						text: `You now follow ${team.name} &#128522;`,
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				} catch (error) {
+					console.log('error: ', error)
+					if (error === 'team_already_picked') {
+						new Noty({
+							type: 'warning',
+							text: `You are already fan of ${team.name} &#128527;`,
+							timeout: 5000,
+							theme: 'metroui'
+						}).show()
+					} else {
+						new Noty({
+							type: 'error',
+							text: `Sorry, an error occured and you could not follow ${team.name} &#128533;`,
+							timeout: 5000,
+							theme: 'metroui'
+						}).show()
+					}
+				}
+			},
+			async deselectTeam(team) {
+				try {
+					console.log('deselectTeam: ', team)
+					await this.$store.dispatch('userTeams/deselectUserTeam', team)
+					new Noty({
+						type: 'success',
+						text: `You successfully unfollow ${team.name} &#128546;`,
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				} catch (error) {
+					console.log('error: ', error)
+					new Noty({
+						type: 'error',
+						text: `Sorry, an error occured and you could not unfollow ${team.name}`,
+						theme: 'metroui'
+					}).show()
+				}
+			},
+			async fetchCompetitions(year) {},
+			async updateUsername() {
+				try {
+					console.log('Click on abc')
+					await this.$store.dispatch('users/updateUser', this.loadedUser)
+					new Noty({
+						type: 'success',
+						text: 'Username updated successfully!',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				} catch (error) {
+					console.log('error: ', error)
+					new Noty({
+						type: 'error',
+						text: 'Sorry, an error occured and your username could not be updated.',
+						timeout: 5000,
+						theme: 'metroui'
+					}).show()
+				}
+			}
+		}
+	}
 </script>
 
 <style scoped>
-    /* Menu compétitions */
-
-    .scrolling-wrapper-flexbox {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    justify-content: center;
-    }
-
-    .cardMenuCompetition {
-    border-radius: 5px;
-    color: white;
-    padding: 6px 6px;
-    background: black;
-    margin: 0 5px;
-    }
-    .cardMenuCompetition:hover {
-        cursor: pointer;
-    }    
-    
-    .container {
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        font: normal 100%/1 "Acme", Helvetica, sans-serif;
-    }
-    .content {
-        background-color: light-gray;
-        overflow-x: auto;
-    }
-    #footer {
-        background-color: red;
-        color: #fff;
-        height: auto;
-        text-align: center;
-    }
-    
-    @media only screen and (min-width: 1000px) {
-        .content img {
-            width: 100%;
-        }
-    }
-    /* End Content */
-    
-    #header {
-    height: 162px;
-    padding: 0;
-    top:0px;
-    left:0px;
-    background-color: black;
-    z-index: 1;
-    border-bottom: 3px solid orangered;
-    position: sticky;
-    }
-    .header {
-    position: relative;
-    }
-    .barreHeader {
-    position:absolute;
-    top: 120px;
-    width: 100%;
-    background-color: orangered;
-    z-index: -1;
-    margin: 0;
-    padding: 0;
-    }
-    #avatar {
-    background-color: black;
-    border-right: 3px solid orangered;
-    border-bottom: 3px solid orangered;
-    box-shadow: 0 7px 5px black;
-    height: 150px;
-    width: 150px;
-    border-radius: 0 0 100% 0;
-    }
-    .imgAvatar {
-    height: 100%;
-    width: 100%;
-    border-radius: 0 0 100% 0;
-    }
-    #team {
-    background-color: black;
-    border-left: 3px solid orangered;
-    border-bottom: 3px solid orangered;
-    box-shadow: 0 7px 5px black;
-    height: 150px;
-    width: 150px;
-    border-radius: 0 0 0 100%;
-    }
-    .imgTeam {
-    height: 100%;
-    width: 100%;
-    border-radius: 0 0 0 100%;
-    }
-    .imgTeamSmall {
-    height: 20px;
-    margin-top: 5px;
-    }
-    .imgHeader {
-    height: 50px;
-    width: 50px;
-    color: green;
-    }
-    .dollarFan {
-    margin-top: 14px;
-    width: 100%;
-    text-align: center;
-    color: green;
-    font-weight: 700;
-    box-shadow: 0 0 10px 2px inset;
-    border-radius: 5px;
-    }
-    .token {
-    margin-top: 14px;
-    width: 100%;
-    text-align: center;
-    color: orangered;
-    font-weight: 700;
-    box-shadow: 0 0 10px 2px inset;
-    border-radius: 5px;
-    }
-    .plusOrangered {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    padding: 0 10px;
-    color: white;
-    font-weight: 700;
-    font-size: 1.2em;
-    background-color: orangered;
-    }
-    .aPlusOrangered :hover {
-    color: orangered;
-    background-color: white;
-    border-bottom: 1px solid orangered;
-    border-left: 1px solid orangered;
-    }
-    .plusYellow {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    padding: 0 10px;
-    color: black;
-    font-weight: 700;
-    font-size: 1.2em;
-    background-color: yellow;
-    }
-    .aPlusYellow :hover {
-    color: black;
-    background-color: white;
-    border-bottom: 1px solid yellow;
-    border-left: 1px solid yellow;
-    }
-    .plusGreen {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    padding: 0 10px;
-    color: white;
-    font-weight: 700;
-    font-size: 1.2em;
-    background-color: green;
-    }
-    .aPlusGreen :hover {
-    color: green;
-    background-color: white;
-    border-bottom: 1px solid green;
-    border-left: 1px solid green;
-    }
-    
-    .orangered {
-    background-color: orangered;
-    border-color: orangered;
-    }
-    
-    /* Material Icons */
-    
-    .material-icons.md-18 { font-size: 18px; }
-    .material-icons.md-24 { font-size: 24px; }
-    .material-icons.md-36 { font-size: 36px; }
-    .material-icons.md-48 { font-size: 48px; }
-    
-    .material-icons {
-    font-family: 'Material Icons';
-    font-weight: normal;
-    font-style: normal;
-    font-size: 24px;  /* Preferred icon size */
-    display: inline-block;
-    line-height: 1;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    white-space: nowrap;
-    direction: ltr;
-
-    /* Support for all WebKit browsers. */
-    -webkit-font-smoothing: antialiased;
-    /* Support for Safari and Chrome. */
-    text-rendering: optimizeLegibility;
-
-    /* Support for Firefox. */
-    -moz-osx-font-smoothing: grayscale;
-
-    /* Support for IE. */
-    font-feature-settings: 'liga';
-    }   
-    
-    /* End Material Icons */
-    
-    .levelHeader {
-    font-weight: 700;
-    font-size: 36px;  /* Preferred icon size */
-    background-color: orange;
-    color: white;
-    border-radius: 10px;
-    }
-    
-    /* End Header */
-    
-    .menuSport {
-        height: 35px;
-    }
-    
-    .menuDay {
-        height: 35px;
-    }
-    
-    .v-expansion-panel__header {
-    padding: 2px 2px;
-    min-height: 24px;
-    }
-
-    .fade-enter-active, .fade-leave-active {
-        transition: opacity 5s;
-        background-color: #000;
-    }
-    
-    .fade-enter, .fade-leave-to {
-        opacity: 0;
-    }
-    
-    .imgLogoEquipe {
-    max-width: 30px;
-    max-height: 30px;
-    }
-    
-    .teamTextSize {
-    font-size: 1.3em;
-    }
-
-    .black {
-    background-color: black;
-    }
-    
-    .imageLogo {
-    width: 30px;
-    height: 30px;
-    }
-    
-    /* ScoreCard */
-
-    .card {
-    border-radius: 5px;
-    }
-    .card-title {
-    background-color: lightslategray;
-    }
-    .card-text {
-    background-color: whitesmoke;
-    width: auto;
-    border-radius: 8px;
-    padding: 8px;
-    }
-    .card-footer {
-    background-color: lightslategrey;
-    }
-    .fas:hover {
-    cursor: pointer;
-    color: #fff;
-    }
-    
-    .userText {
-    font-size: 1.3em;
-    }
-    
-    .connectText {
-    font-size: 1.3em;
-    }
-    
-    .chiffres {
-    font-size: 2.5em;
-    color: orangered;
-    font-width: 700;
-    }
-    
-    .activity {
-    font-size: 1.5em;
-    text-transform: uppercase;
-    }
-    
-    .levelBox {
-    background-color: #757575;
-    color: black;
-    vertical-align: middle;
-    padding: 2px;
-    border-radius: 3px;
-    width: 95%;
-    margin: auto;
-    }
-    
-    .energyBox {
-    background-color: #757575;
-    color: black;
-    vertical-align: middle;
-    padding: 2px;
-    border-radius: 3px;
-    width: 95%;
-    margin: auto;
-    }
-    
-    .dollarBox {
-    background-color: #757575;
-    color: black;
-    vertical-align: middle;
-    padding: 2px;
-    border-radius: 3px;
-    width: 95%;
-    margin: auto;
-    }
-
-    .tokenBox {
-    background-color: #757575;
-    color: black;
-    vertical-align: middle;
-    padding: 2px;
-    border-radius: 3px;
-    width: 95%;
-    margin: auto;
-    }
-
-    /* Footer */
-    .barreOrangered {
-        width: 100%;
-        padding: 0;
-        margin: 0; 
-        height: 3px;
-        background-color: orangered;
-    }
-    .barreBlack {
-        width: 100%;
-        padding: 0;
-        margin: 0;
-        height: 8px;
-        background-color: black;
-    }
-    
-    #dock-container {
-        height: 80px;
-        padding: 0;
-        margin: 0;
-        bottom: 0;
-        background-color: orangered;
-        border: none;
-        border-top: 4px solid orangered;
-    }
-
-    #dock-container li#active img {
-        -webkit-transform: scale(1.65);
-        margin: 0 0.5em;
-    }
-
-    #dock-container li {
-        width: 17%;
-        padding: 0;
-        margin: 0;
-        list-style-type: none;
-        display: inline-block;
-        position: relative;
-        padding-top: 10px;
-    }
-
-    #dock-container ul {
-        width: 100%;
-        padding-left: 0px;
-        padding-right: 0px;
-        margin-bottom: 0;
-    }
-
-    #dock-container li img {
-        width: 58px;
-        height: 58px;
-        -webkit-gradient: (linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(rgba(255,255,255,.5)));
-        -webkit-transition: all 0.3s;
-        -webkit-transform-origin: 50% 100%;
-    }
-
-    #dock-container li:hover img { 
-        -webkit-transform: scale(1.65);
-        margin: 0 0.5em;
-    }
-
-    #dock-container li:hover + li img, #dock-container li.prev img {
-        -webkit-transform: scale(1);
-        margin: 0 0;
-    }
-
-    #dock-container li span {
-        display: none;
-        position: absolute;
-        bottom: 0px;
-        left: 0;
-        width: 100%;
-        background-color: rgba(0,0,0,0.5);
-        border-radius: 5px;
-    }
-
-    #dock-container li#active span {
-        display: none;
-        position: absolute;
-        bottom: 0px;
-        left: 0;
-        width: 100%;
-        background-color: rgba(0,0,0,0.5);
-        border-radius: 5px;
-    }
-
-    #dock-container li#active span {
-        display: block;
-        color: #fff;
-    }
-
-    #dock-container li#active .textMenu {
-        font: normal 120%/1 "Acme", Helvetica, sans-serif;
-        padding: 2px;
-    }
-
-    #dock-container li:hover span {
-        display: block;
-        color: #fff;
-    }
-
-    #dock-container .textMenu {
-        font: normal 120%/1 "Acme", Helvetica, sans-serif;
-        padding: 2px;
-    }
-    /* End Footer */
-
-    .imgTeamLogoWrapper {
-        width: 50px; 
-        padding-right: 15px;
-    }
-    .imgTeamLogo {
-        max-width: 35px;
-        max-height: 35px;
-    }
-    >>>.v-expansion-panel__header {
-        min-height: 0;
-        height: 35px;
-    }
-    .pd-left10 {
-    padding-left: 6px;
-    }  
-
-    /* End Menu */
-
-        @media only screen and (max-width: 768px) {
-
-        .scrolling-wrapper-flexbox {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        justify-content: flex-start;
-        }
-
-        #app {
-        font: normal 90%/1 "Acme", Helvetica, sans-serif;
-        }
-        
-        .pd-right10 {
-        padding-right: 10px;
-        }
-        
-        .pd-left10 {
-        padding-left: 6px;
-        }
-        
-        .imgLogoEquipe {
-        max-width: 35px;
-        }
-        
-        .teamTextSize {
-        font-size: 1.1em;
-        }
-        
-        .headerMenus {
-        padding: 0; 
-        margin: 0; 
-        height: 46px;
-        }
-        
-        .energyBox {
-        background-color: #757575;
-        color: black;
-        vertical-align: middle;
-        padding: 1px;
-        border-radius: 2px;
-        width: 95%;
-        margin: auto;
-        font-size: 0.8em;
-        }
-        
-        .userText {
-        font-size: 0.8em;
-        }
-        
-        .connectText {
-        font-size: 0.8em;
-        }
-
-        /* Header */
-
-        .imageLogoTif {
-        width: 60px;
-        height: 60px;
-        }
-        
-        .backBlack {
-        background-image: url("/images/header-TIF_03.png");
-        background-position: center;
-        background-repeat: repeat-x;
-        background-size: contain;
-        height: 60px;
-        }
-
-        .boxTif {
-        width: 60px;
-        height: 60px;
-        }
-
-        .imageLogo {
-        width: 25px;
-        height: 25px;
-        }
-        
-        .menuSport {
-            height: 35px;
-        }
-        
-        .menuDay {
-            height: 35px;
-        }
-        
-        .headerLogo {
-        height: auto;
-        }
-        
-        .headerMenu {
-        height: 46px;
-        }
-        
-        .v-expansion-panel__header {
-        padding: 2px 2px;
-        min-height: 24px;
-        }
-        
-        .chiffres {
-        font-size: 1.2em;
-        }
-        
-        .activity {
-        font-size: 0.8em;
-        }
-        
-        /* Menu */
-
-        #dock-container {
-        height: 55px;
-        padding: 0;
-        margin: 0;
-        bottom: 0;
-        background-color: rgb(248,147,37);
-        border: none;
-        border-top: 4px solid darkred;
-        }
-
-        #dock-container li#active img {
-        -webkit-transform: scale(1.65);
-        margin: 0 0.5em;
-        }
-
-        #dock-container li {
-        width: 17%;
-        padding: 0;
-        margin: 0;
-        list-style-type: none;
-        display: inline-block;
-        position: relative;
-        padding-top: 3px;
-        }
-
-        #dock-container ul {
-        width: 100%;
-        padding-left: 0px;
-        padding-right: 0px;
-        margin-bottom: 0;
-        }
-
-        #dock-container li img {
-        width: 38px;
-        height: 38px;
-        -webkit-gradient: (linear, left top, left bottom, from(transparent), color-stop(0.7, transparent), to(rgba(255,255,255,.5)));
-        -webkit-transition: all 0.3s;
-        -webkit-transform-origin: 50% 100%;
-        }
-
-        #dock-container li:hover img { 
-        -webkit-transform: scale(1.65);
-        margin: 0 0.5em;
-        }
-
-        #dock-container li:hover + li img, #dock-container li.prev img {
-        -webkit-transform: scale(1);
-        margin: 0 0;
-        }
-
-        #dock-container li span {
-        display: none;
-        position: absolute;
-        bottom: 0px;
-        left: 0;
-        width: 100%;
-        background-color: rgba(0,0,0,0.5);
-        border-radius: 5px;
-        }
-
-        #dock-container li#active span {
-        display: none;
-        position: absolute;
-        bottom: 0px;
-        left: 0;
-        width: 100%;
-        background-color: rgba(0,0,0,0.5);
-        border-radius: 5px;
-        }
-
-        #dock-container li#active span {
-        display: block;
-        color: #fff;
-        }
-
-        #dock-container li#active .textMenu {
-        font: normal 90%/1 "Acme", Helvetica, sans-serif;
-        padding: 2px;
-        }
-
-        #dock-container li:hover span {
-        display: block;
-        color: #fff;
-        }
-
-        #dock-container .textMenu {
-        font: normal 90%/1 "Acme", Helvetica, sans-serif;
-        padding: 2px;
-        }
-
-    }
-
-        /* Début de l'ajout J-M */
-        .active {
-            background: orangered;
-            color: #fff;
-        }
-        .greenBar {
-            background-color: green; 
-            height: 40px; 
-            width: 2px;
-        }
-        .redBar {
-            background-color: red; 
-            height: 40px; 
-            width: 2px;
-        }
-        /* Fin de l'ajout J-M */
-        
-        >>>.v-expansion-panel__header {
-            min-height: 0;
-            height: 35px;
-            padding: 6px 12px;
-        }
-    </style>
+	.hover {
+		border: 2px solid var(--v-primary-base);
+		cursor: pointer;
+	}
+	.selected {
+		/* background: yellow; */
+		background: var(--v-primary-lighten4);
+	}
+</style>
