@@ -109,15 +109,15 @@ module.exports = app.use(async function(req, res, next) {
 
         // console.log('response.status: ', response.status);
 		// console.log('response.body.api.fixtures: ', response.body.api.fixtures);
-		const abc = competitionsArray.forEach(function (competition) {
-			console.log('competition2: ', competition)
-			return parseInt(competition.apifootball_id) === 524
-		})
-		console.log('abc: ', abc)
-		const abc2 = activeCompetitions2.find(function (competition) {
-			return parseInt(competition.apifootball_id) === 524
-		})
-		console.log('abc2: ', abc2)
+		// const abc = competitionsArray.forEach(function (competition) {
+		// 	console.log('competition2: ', competition)
+		// 	return parseInt(competition.apifootball_id) === 524
+		// })
+		// console.log('abc: ', abc)
+		// const abc2 = activeCompetitions2.find(function (competition) {
+		// 	return parseInt(competition.apifootball_id) === 524
+		// })
+		// console.log('abc2: ', abc2)
 
         let updates = {}
 
