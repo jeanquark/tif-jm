@@ -53,6 +53,7 @@ module.exports = app.use(async function(req, res, next) {
     try {
 		let updates = {};
 		const league_id = parseInt(req.body.league_id);
+		console.log('league_id: ', league_id);
 		
         // 1) First, fetch competitions
         const competitionsArray = []
@@ -80,11 +81,12 @@ module.exports = app.use(async function(req, res, next) {
             // Only add present and future fixtures to database
 			const yesterday = moment().subtract(1, 'days').unix();
 			// console.log('yesterday: ', yesterday);
+			const competition = competitionsArray.find(competition => competition.apifootball_id == match.league_id)
 
-            if (match.event_timestamp > yesterday) {
+            // if (match.event_timestamp > yesterday) {
 				const id = match.fixture_id
 				// console.log('id: ', id);
-				const roundShort = match.round.substring(match.round.lastIndexOf('-') + 2)
+				const roundShort =  /\d/.test(match.round) ? match.round.substring(match.round.lastIndexOf('-') + 2) : match.round
 				updates[`/events/${id}/date_iso8601`] = match.event_date
 				updates[`/events/${id}/date`] = moment(match.event_date).format('YYYY-MM-DD')
 				updates[`/events/${id}/time`] = moment(match.event_date).format('HH:mm')
@@ -113,7 +115,7 @@ module.exports = app.use(async function(req, res, next) {
 				updates[`/events/${id}/competition_name`] = competition.name
 				updates[`/events/${id}/competition_slug`] = competition.slug
 				updates[`/events/${id}/competition_round`] = `${competition.slug}_${roundShort}`
-			}
+			// }
         });
 		// console.log('updates: ', updates);
 

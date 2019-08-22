@@ -8,7 +8,7 @@ import { resolveObject } from 'url'
 export const state = () => ({
     loadedEvent: {},
     loadedEventsByDay: {},
-    loadedEventsByCompetitionByRound: {},
+    eventsByCompetitionByRound: {},
     loadedEventActionsUserNotification: {},
     // loadedEventHomeTeamNotifications: [],
     // loadedEventVisitorTeamNotifications: []
@@ -37,7 +37,7 @@ export const mutations = {
         console.log('round: ', round)
         state.eventsByCompetitionByRound = Object.assign({}, state.eventsByCompetitionByRound, {
             [competition]: Object.assign({}, state.eventsByCompetitionByRound[competition], {
-                [round]: payload.eventsArray
+				[round]: payload.events
             })
         })
     },
@@ -137,26 +137,28 @@ export const actions = {
 		})
 	},
 	fetchEventsByCompetitionByRound({ commit }, payload) {
-		console.log('fetchEventsByCompetitionByRound: ', payload)
+		console.log('fetchEventsByCompetitionByRound action: ', payload.competitionSlug, payload.round)
 		return new Promise((resolve, reject) => {
 			try {
 				firebase
 					.database()
 					.ref('/events/')
 					.orderByChild('competition_round')
-					.equalTo('switzerland_super_league_2019_2020_1')
+					// .equalTo('switzerland_super_league_2019_2020_1')
+					.equalTo(`${payload.competitionSlug}_${payload.round}`)
 					.on('value', function(snapshot) {
 						const eventsArray = []
 						snapshot.forEach(event => {
-							if (event.val().competition_active !== false) {
+							// if (event.val().competition_active !== false) {
 								eventsArray.push({ ...event.val(), id: event.key })
-							}
+							// }
 						})
 						const sortedEventsArray = eventsArray.sort((a, b) => a.timestamp - b.timestamp)
 						// const events = { date: date, events: sortedEventsArray }
-						const events = { date: payload, events: sortedEventsArray }
+						console.log('sortedEventsArray: ', sortedEventsArray)
+						const events = { round: payload.round, competition: payload.competitionSlug, events: sortedEventsArray }
 						console.log('events: ', events)
-						commit('setEventsByCompetitionRound', events)
+						commit('setEventsByCompetitionByRound', events)
 						resolve()
 					})
 			} catch (error) {
@@ -205,7 +207,7 @@ export const actions = {
             }
         }
     },
-    fetchEventsByCompetitionByRound({ commit }, payload) {
+    fetchEventsByCompetitionByRound2({ commit }, payload) {
         const competition = payload.competition.toString()
         const round = payload.round
         console.log('competition: ', competition)
@@ -444,7 +446,7 @@ export const getters = {
         return state.loadedEventsByDay
     },
     loadedEventsByCompetitionByRound(state) {
-        return state.loadedEventsByCompetitionByRound
+        return state.eventsByCompetitionByRound
     },
     // loadedEventUsers(state) {
     //     return state.loadedEventUsers

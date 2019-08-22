@@ -115,7 +115,9 @@ module.exports = app.use(async function(req, res, next) {
                     // }
 
                     const id = match.fixture_id
-                    const roundShort = match.round.substring(match.round.lastIndexOf('-') + 2)
+					// const roundShort = match.round.substring(match.round.lastIndexOf('-') + 2)
+					const roundShort =  /\d/.test(match.round) ? match.round.substring(match.round.lastIndexOf('-') + 2) : match.round
+					
                     // updates[`/events/${id}/id`] = id;
                     updates[`/events/${id}/date_iso8601`] = match.event_date
                     updates[`/events/${id}/date`] = moment(match.event_date).format('YYYY-MM-DD')
@@ -145,7 +147,8 @@ module.exports = app.use(async function(req, res, next) {
                     updates[`/events/${id}/statusShort`] = match.statusShort
                     updates[`/events/${id}/competition_id`] = match.league_id
                     updates[`/events/${id}/competition_name`] = competition.name
-                    updates[`/events/${id}/competition_slug`] = competition.slug
+					updates[`/events/${id}/competition_slug`] = competition.slug
+					updates[`/events/${id}/competition_round`] = `${competition.slug}_${roundShort}`					
                 }
             })
         }

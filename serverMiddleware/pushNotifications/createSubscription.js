@@ -37,7 +37,7 @@ module.exports = app.use(async function(req, res, next) {
 
         for (let team of teams) {
             const dataObject = {
-                endpoint: newSubscription.endpoint,
+				endpoint: newSubscription.endpoint,
                 keys: newSubscription.keys,
                 user_id: userId,
                 created_at: moment().unix(),
@@ -45,7 +45,13 @@ module.exports = app.use(async function(req, res, next) {
                     name: team.name,
                     slug: team.slug
                 },
-                team_slug: team.slug
+				// team_slug: team.slug,
+				notifications: {
+					goals: true,
+					game_starts: true,
+					game_ends: true,
+					game_starts_in_30_minutes: false
+				}
             }
             const newSubscriptionKey = admin
                 .database()

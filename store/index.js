@@ -94,14 +94,14 @@ export const actions = {
     },
     nuxtClientInit({ commit, rootState, rootGetters }, context) { // Added package (not present in default nuxt)
         try {
-            console.log('nuxtClientInit')
+            // console.log('nuxtClientInit')
             // const userId2 = rootState.users.loadedUser ? rootState.users.loadedUser.id : null
             const userId = rootGetters['users/loadedUser'] ? rootGetters['users/loadedUser'].uid : null
-            console.log('userId from nuxtClientInit: ', userId)
+            // console.log('userId from nuxtClientInit: ', userId)
             // const userId = 'AdGWmQi4aadNeVgQxkfRKZHQzvb2'
             if (userId) {
                 firebase.database().ref(`/users/${userId}`).on('value', function(snapshot) {
-                    console.log('snapshot.val() from nuxtClientInit: ', snapshot.val())
+                    // console.log('snapshot.val() from nuxtClientInit: ', snapshot.val())
                     commit('users/setLoadedUser', snapshot.val(), { root: true })
                 })
             }

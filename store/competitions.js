@@ -38,7 +38,6 @@ export const mutations = {
 export const actions = {
     fetchCompetitionsByCountry({ commit }, payload) {
         return new Promise(resolve => {
-            // console.log('fetchCompetitionsByCountry store: ', payload)
             firebase
                 .database()
                 .ref('/competitions')
@@ -54,9 +53,7 @@ export const actions = {
                             })
                         }
                     }
-                    // console.log('competitionsArray: ', competitionsArray)
 					const orderedCompetitions = competitionsArray.sort((a, b) => a.ranking_country - b.ranking_country)
-					// console.log('orderedCompetitions: ', orderedCompetitions)
                     commit('setCompetitionsByCountry', {
                         country: payload,
                         competitions: orderedCompetitions

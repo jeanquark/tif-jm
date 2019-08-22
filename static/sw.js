@@ -1,5 +1,5 @@
 self.addEventListener('fetch', event => {
-    console.log('[Service Worker] Fetch event called')
+    // console.log('[Service Worker] Fetch event called')
     event.respondWith(
         caches
             .match(event.request)

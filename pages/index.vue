@@ -10,7 +10,7 @@
                                     <v-btn color="default" @click.stop="openLoginModal">Login</v-btn>
                                     <v-btn color="default" @click.stop="openRegisterModal">Register</v-btn>
                                 </div>
-                                <v-btn round large color="black" nuxt to="/" class="white--text">Score mode</v-btn>
+                                <v-btn round large color="black" nuxt to="/scoremode" class="white--text">Score mode</v-btn>
                                 <span class="tifUpperHalf">TIF</span>
                             </v-layout>
                             <v-layout justify-center align-center class="lowerHalf">
