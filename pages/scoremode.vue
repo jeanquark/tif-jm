@@ -82,7 +82,7 @@
                                         </v-layout>
                                     </template>
                                 </v-data-table>
-                                <content-loader :height="130" :width="400" :speed="0" primaryColor="#ffffff" secondaryColor="#ffffff">
+                                <content-loader :height="130" :width="400" :speed="0" primaryColor="#ffffff" secondaryColor="#ffffff" v-else>
                                     <rect x="-5" y="19" rx="4" ry="4" width="413.71" height="19" />
                                     <rect x="-3" y="56" rx="4" ry="4" width="405.76" height="19" />
                                     <rect x="-2" y="88" rx="4" ry="4" width="405.76" height="19" />
@@ -127,7 +127,7 @@
                                         </v-layout>
                                     </template>
                                 </v-data-table>
-                                <content-loader :height="100" :width="400" :speed="0" primaryColor="#eaeaea" secondaryColor="#ffffff">
+                                <content-loader :height="100" :width="400" :speed="0" primaryColor="#eaeaea" secondaryColor="#ffffff" v-else>
                                     <rect x="-5" y="19" rx="4" ry="4" width="413.71" height="17.86" />
                                     <rect x="-3" y="56" rx="4" ry="4" width="405.76" height="17.86" />
                                     <rect x="-2" y="88" rx="4" ry="4" width="405.76" height="17.86" />
