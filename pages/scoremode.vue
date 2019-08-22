@@ -221,7 +221,7 @@
 				// 	this.fetchEventsByCompetitionByRound(this.selectedCompetition.slug, this.active_round_tab +1)
 				// 	return []
 				// }
-				if (this.selectedCompetition.slug && this.active_round_tab) {
+				if (this.$store.getters['events/loadedEventsByCompetitionByRound'] && this.$store.getters['events/loadedEventsByCompetitionByRound'][this.selectedCompetition.slug]) {
 					return this.$store.getters['events/loadedEventsByCompetitionByRound'][this.selectedCompetition.slug][this.active_round_tab + 1]
 				}
 				return []
