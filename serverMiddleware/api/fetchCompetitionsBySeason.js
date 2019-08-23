@@ -13,7 +13,7 @@ function getCompetitionsBySeason (season) {
     const url = `https://api-football-v1.p.rapidapi.com/v2/leagues/season/${season}`;
     return unirest.get(url).headers({
         'Accept': 'application/json',
-        'X-RapidAPI-Key': 'V5NyybcqoimshrFl7oR8yKKDMyxhp10zkcfjsnGw3uB6ZeMcDI'
+        'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
     });
 }
 

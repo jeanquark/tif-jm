@@ -203,7 +203,15 @@ module.exports = {
         {
             path: '/set-custom-claims',
             handler: '~/serverMiddleware/setCustomClaims'
-        }
+		},
+		{
+			path: '/competitions/fetch-competitions-file', // GET request
+			handler: '~/serverMiddleware/competitions/fetchCompetitionsFile'
+		},
+		{
+			path: '/competitions/update-competitions-file', // POST request with { competitions } as body data
+			handler: '~/serverMiddleware/competitions/updateCompetitionsFile'
+		}
     ],
     css: ['~/assets/style/app.styl'],
     build: {

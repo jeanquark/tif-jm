@@ -4,7 +4,7 @@ export default ({ store }) => {
   window.onNuxtReady(() => {
     new VuexPersistence({
 		reducer: state => ({
-			// user: state.user,
+			// users: state.loadedUser,
 			userTeams: state.userTeams
 		})
     }).plugin(store);

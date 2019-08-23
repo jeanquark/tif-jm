@@ -12,7 +12,7 @@ function getTeamsByLeague (league_id) {
     const url = `https://api-football-v1.p.rapidapi.com/v2/teams/league/${league_id}`;
     return unirest.get(url).headers({
         'Accept': 'application/json',
-        'X-RapidAPI-Key': 'V5NyybcqoimshrFl7oR8yKKDMyxhp10zkcfjsnGw3uB6ZeMcDI'
+        'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
     });
 }
 

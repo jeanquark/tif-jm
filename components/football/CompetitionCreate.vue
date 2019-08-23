@@ -1,17 +1,5 @@
 <template>
     <v-card>
-        <!-- selectedActivity: {{ activity }}<br /><br />
-		selectedCategory: {{ category }}<br /><br />
-		imageData: {{ this.imageData }}<br /><br />
-		selectedGroups: {{ this.selectedGroups }}<br /><br />
-		selectedGroupsNumber: {{ this.selectedGroupsNumber }}<br /><br />
-		selectedTeamsGroup: {{ this.selectedTeamsGroup }}<br /><br />
-		selectedTeams: {{ this.selectedTeams }}<br /><br /> -->
-        <!-- loadedTeams: {{ this.loadedTeams }}<br /><br /> -->
-        <!-- apiFootballKey: {{ apiFootballKey }}<br /><br /> -->
-        <!-- loadedCountries: {{ loadedCountries }}<br /><br /> -->
-        <!-- loadedCompetitions: {{ loadedCompetitions }}<br /><br /> -->
-        <!-- selectedCompetition: {{ selectedCompetition }}<br /><br /> -->
         <v-card-title class="primary-title">
             <v-card-text class="text-md-center">
                 <h2>Football competition<i class="fa fa-futbol"></i></h2>
@@ -25,29 +13,20 @@
                 <v-flex xs12 sm6 offset-sm3>
                     <v-autocomplete :items="loadedSeasons" label="Select year of the starting season" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedSeason" @change="fetchCompetitionsByCountryAndSeason"></v-autocomplete>
                 </v-flex>
-                <!-- <v-flex xs12 class="text-xs-center">
-					<v-btn color="primary" @click.stop="fetchCompetitionsByCountryAndSeason">Get competitions</v-btn>
-				</v-flex> -->
-                <!-- v-if="loadedCompetitions && loadedCompetitions.length > 0" -->
                 <v-flex xs12 sm6 offset-sm3>
                     <v-autocomplete :items="loadedCompetitions" label="Select a competition" item-text="name" item-value="slug" single-line :return-object="true" v-model="selectedCompetition"></v-autocomplete>
                 </v-flex>
-                <v-flex xs12 class="text-xs-center">
+                <v-flex xs12 sm6 offset-sm3 class="text-xs-center">
                     <v-btn color="primary" @click.stop="addCompetition" :disabled="!selectedCompetition" :loading="loading">
                         Add competition
-                    </v-btn>
+                    </v-btn><br />
+                    <v-layout class="align-center" v-if="loading">
+                        <v-icon color="error">error</v-icon><small>This request will retrieve all matches for the competition as well as all events and all statistics for each match. So it can take some time to complete. Please be patient and wait until a message is returned back.</small>
+                    </v-layout>
                 </v-flex>
+
             </v-layout>
         </v-container>
-        <v-card-text class="text-md-center">
-            <!-- <v-btn @click="submitCreateCompetition" color="info" :disabled="this.selectedTeams.length === 0 && this.selectedTeamsGroup.length === 0 || this.checkCompetitionSlugUniqueness(this.selectedSlug + '_' + this.selectedYear) || loading">Soumettre&nbsp;<i v-bind:class="{'fa fa-spinner fa-spin' : loading}"></i></v-btn>
-			<v-btn @click="clearAll" color="warning">Nettoyer</v-btn>
-			<nuxt-link to="/admin/competitions" class="btn">Retour</nuxt-link> -->
-
-            <!-- Display alert messages in case of disabled submit button -->
-            <!-- <v-alert :value="true" color="error" v-if="checkCompetitionSlugUniqueness(this.selectedSlug + '_' + this.selectedYear)">Une compétition avec ce nom existe déjà!</v-alert>
-			<v-alert :value="true" color="error" v-if="selectedTeams.length === 0">Aucune équipe sélectionnée.</v-alert> -->
-        </v-card-text>
     </v-card>
 </template>
 
@@ -121,8 +100,7 @@
 				const fetchedCompetitions = await axios.get(`https://api-football-v1.p.rapidapi.com/v2/leagues/country/${this.selectedCountry.apifootball_name}/${this.selectedSeason}`, {
 					headers: {
 						Accept: 'application/json',
-						//    'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
-						'X-RapidAPI-Key': 'V5NyybcqoimshrFl7oR8yKKDMyxhp10zkcfjsnGw3uB6ZeMcDI'
+						'X-RapidAPI-Key': process.env.APIFOOTBALL_KEY
 					}
 				})
 				console.log('fetchedCompetitions: ', fetchedCompetitions)
@@ -135,6 +113,9 @@
 					await this.$store.dispatch('competitions/createCompetition', this.selectedCompetition)
 					this.$store.commit('setLoading', false)
 					this.$router.push('/admin/competitions')
+					this.selectedCountry = ''
+					this.selectedSeason = ''
+					this.selectedCompetition = ''
 					new Noty({
 						type: 'success',
 						text: 'Compétition créée avec succès!',

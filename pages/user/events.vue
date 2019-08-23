@@ -15,7 +15,7 @@
                             <v-tab v-for="(day, index) in days" :key="index" ripple style="cursor: pointer;">
                                 {{ displayDate(day) }}
                             </v-tab>
-                            <v-tab-item v-for="(day, index) in days" :key="index" :transition="false" :reverse-transition="false">
+                            <v-tab-item lazy v-for="(day, index) in days" :key="index" :transition="false" :reverse-transition="false">
                                 <!-- MY EVENTS -->
                                 <v-expansion-panel class="elevation-0" :value="0">
                                     <v-expansion-panel-content class="orange">

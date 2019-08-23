@@ -9,6 +9,7 @@
         <v-spacer></v-spacer>
         <!-- loadedUser: {{ loadedUser }} -->
         <!-- <v-img :src="loadedUser.picture" max-width="20"></v-img> -->
+		<v-btn small color="primary" nuxt to="/competitions">Competitions</v-btn>
         <v-btn small color="success" nuxt to="/teams">Teams</v-btn>
         <v-btn small color="info" nuxt to="/user/events">Events</v-btn>
         <v-btn small color="warning" nuxt to="/admin">Admin (resticted area)</v-btn>
