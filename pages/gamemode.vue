@@ -7,6 +7,7 @@
                 <gamemode-header />
 
                 <!-- loadedUserSubscriptions: {{ loadedUserSubscriptions }}<br /><br /> -->
+                <!-- loadedUser: {{ loadedUser }}<br /><br /> -->
 
                 <v-layout row wrap justify-center align-center class="my-4" style="">
                     <v-flex xs4 offset-xs2 class="text-xs-center">
@@ -36,7 +37,11 @@
                     <v-btn color="success" class="elevation-0" @click="addToHomescreen" v-if="showAddToHomeScreenButton">Add App to homescreen</v-btn>
                 </v-layout>
 
-                <v-layout row wrap justify-center align-center class="my-2" v-if="showSubscribeToPushNotificationsCheckbox">
+                <v-layout v-if="deniedPushNotifications">
+                    You have blocked notifications on this device.
+                </v-layout>
+
+                <v-layout row wrap justify-center align-center class="my-2" v-if="showSubscribeToPushNotifications">
                     <!-- <v-flex xs12>
                         <h3 class="text-xs-center">For a full TIF experience, enable notifications!</h3>
                         <v-checkbox v-model="subscribeToPushNotificationsCheckbox" label="Get notified when your team scores" color="primary" @change="changePushNotificationsStatus()"></v-checkbox>
@@ -44,17 +49,25 @@
                         <b>Note:</b> Notifications are activated per device. To receive notifications on multiple devices, sign-in on each device, enable notifications, and make sure you're online. However, turning off notifications on one device will turn them off on all devices.
                     </v-flex> -->
                     <v-flex xs12>
-                        <v-switch color="primary" label="Enable notifications" class="justify-center" @change="subscribeToPushNotifications()" v-model="userIsSubscribedToPushNotifications"></v-switch>
+                        <v-switch color="primary" label="Enable notifications" class="justify-center" @change="toggleSubscribeToPushNotifications()" v-model="subscribeToPushNotifications"></v-switch>
                     </v-flex>
                 </v-layout>
 
-                <v-layout row wrap justify-center class="my-2" style="background-color: #000;" v-else>
+                <v-layout row wrap justify-center class="my-2" style="background-color: #ccc;" v-else>
                     <v-flex xs12 class="my-2">
                         <h3 class="text-xs-center">Notifications status on this device</h3>
                     </v-flex>
                     <v-flex xs12 sm6 md4 v-for="subscription in loadedUserSubscriptions" :key="subscription.id">
                         <v-card class="ma-2 pa-3">
-                            <v-card-title primary-title class="text-xs-center">{{ subscription.team.name }}
+                            <v-card-title primary-title class="text-xs-center">
+                                <v-layout row wrap align-center>
+                                    <v-flex xs12 sm6>
+                                        <v-img :src="`/images/teams/${subscription.team.slug}.png`"></v-img>
+                                    </v-flex>
+                                    <v-flex xs12 sm6>
+                                        <h4>{{ subscription.team.name }}</h4>
+                                    </v-flex>
+                                </v-layout>
                             </v-card-title>
                             <!-- {{ subscription.notifications }} -->
                             <v-card-text>
@@ -87,6 +100,7 @@
 	import GamemodeHeader from '~/components/GamemodeHeader'
 	import Noty from 'noty'
 	import axios from 'axios'
+	import slugify from '~/helpers/slugify.js'
 
 	// PWA Install to Homescreen
 	let deferredPrompt
@@ -120,6 +134,9 @@
 			// 	this.showSubscribeToPushNotificationsCheckbox = true
 			// 	// alert('Notifications denied!')
 			// }
+			// console.log('screen.width: ', window.screen.width)
+			// console.log('screen.height: ', window.screen.height)
+			// console.log('navigator.navigator.userAgent: ', slugify(window.navigator.userAgent))
 
 			window.addEventListener('beforeinstallprompt', e => {
 				console.log('beforeinstallprompt called!!!!')
@@ -132,9 +149,11 @@
 		data() {
 			return {
 				showAddToHomeScreenButton: false,
-				userIsSubscribedToPushNotifications: false,
-				subscribeToPushNotificationsCheckbox: false,
-				showSubscribeToPushNotificationsCheckbox: false,
+				// userIsSubscribedToPushNotifications: false,
+				// subscribeToPushNotificationsCheckbox: false,
+				subscribeToPushNotifications: false,
+				deniedPushNotifications: false,
+				showSubscribeToPushNotifications: false,
 				checkSubscriptionButtonLoading: false
 			}
 		},
@@ -167,39 +186,39 @@
 			async checkUserSubscriptions(displayMessage = true) {
 				try {
 					console.log('Call to checkSubscription method')
-					// 1) Check if navigator supports service worker and push notifications
+					// 1) Check if navigator supports Service Worker and Push notifications
 					if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
 						// Service Worker isn't supported on this browser, disable or hide UI.
 						// Push isn't supported on this browser, disable or hide UI.
 						return
 					}
 
-					// 2) Register Service Worker
-					// window.addEventListener('load', function() {
-					// 	navigator.serviceWorker.register('/service-worker.js');
-					// });
-					const serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js')
-					console.log('serviceWorkerRegistration: ', serviceWorkerRegistration)
-
-					// 3) Check if user has accepted push notifications from browser
-					console.log('Notification.permission: ', Notification.permission)
-					// const serviceWorkerRegistration = await navigator.serviceWorker.ready
-					// console.log('serviceWorkerRegistration: ', serviceWorkerRegistration)
-					// const pushSubscription = await serviceWorkerRegistration.​pushManager.getSubscription()
-					const pushSubscription = await serviceWorkerRegistration.pushManager.getSubscription()
-					console.log('Active subscriptions: ', pushSubscription)
-					if (pushSubscription) {
-						this.userIsSubscribedToPushNotifications = true
-						console.log('Subscriptions')
-						if (!this.$store.getters['subscriptions/loadedUserSubscriptions'] || this.$store.getters['subscriptions/loadedUserSubscriptions'].length < 1) {
-							this.$store.dispatch('subscriptions/fetchUserSubscriptions', pushSubscription.endpoint)
+					// 2) Check if user has accepted push notifications from the browser
+					const permission = Notification.permission
+					console.log('permission: ', permission)
+					if (permission === 'granted') {
+						const serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js')
+						console.log('serviceWorkerRegistration: ', serviceWorkerRegistration)
+						const pushSubscription = await serviceWorkerRegistration.pushManager.getSubscription()
+						if (pushSubscription && pushSubscription.endpoint) {
+							// this.$store.dispatch('subscriptions/fetchUserSubscriptions')
+							this.userIsSubscribedToPushNotifications = true
+							console.log('pushSubscription.endpoint: ', pushSubscription.endpoint)
+							if (!this.$store.getters['subscriptions/loadedUserSubscriptions'] || this.$store.getters['subscriptions/loadedUserSubscriptions'].length < 1) {
+								this.$store.dispatch('subscriptions/fetchUserSubscriptions', pushSubscription.endpoint)
+							}
+						} else {
+							this.showSubscribeToPushNotifications = true
+							console.log('No subscriptions')
+							const deviceIdentifier = `${window.screen.width}_${window.screen.height}_${slugify(window.navigator.userAgent)}`
+							console.log('deviceIdentifier: ', deviceIdentifier)
+							await this.$store.dispatch('subscriptions/deleteUserSubscriptions', { userId: this.loadedUser.id, deviceIdentifier })
 						}
+					} else if (permission === 'denied') {
+						this.deniedPushNotifications = true
 					} else {
-						this.showSubscribeToPushNotificationsCheckbox = true
-						console.log('No subscriptions')
-						// if (!this.$store.getters['subscriptions/loadedUserSubscriptions'] || this.$store.getters['subscriptions/loadedUserSubscriptions'].length < 1) {
-							await this.$store.dispatch('subscriptions/deleteUserSubscriptions')
-						// }
+						// default
+						this.showSubscribeToPushNotifications = true
 					}
 				} catch (error) {
 					console.log('error: ', error)
@@ -224,44 +243,6 @@
 						theme: 'metroui'
 					}).show()
 				}
-			},
-			async changePushNotificationsStatus() {
-				// console.log('onCheckboxChange', arguments)
-				// console.log('subscribeToPushNotifications: ', this.subscribeToPushNotificationsCheckbox)
-				if (this.subscribeToPushNotificationsCheckbox) {
-					document.getElementById('overlay').style.display = 'block'
-					const permissionResult = await this.askPermissionToPushNotifications()
-					console.log('permissionResult: ', permissionResult)
-					if (permissionResult === 'granted') {
-						const pushSubscription = await this.subscribeToPushNotifications()
-						console.log('pushSubscription: ', pushSubscription)
-					}
-					// let permission
-					// Notification.requestPermission(function(result) {
-					// 	console.log('result: ', result)
-					// 	if (result === 'denied') {
-					// 		// Show some GIF on how to enable notifications from the navigator
-					// 		new Noty({
-					// 			type: 'error',
-					// 			text: 'You denied subscriptions!',
-					// 			timeout: 5000,
-					// 			theme: 'metroui'
-					// 		}).show()
-					// 	}
-					// 	if (result === 'granted') {
-					// 		new Noty({
-					// 			type: 'success',
-					// 			text: 'You are subscribed!',
-					// 			timeout: 5000,
-					// 			theme: 'metroui'
-					// 		}).show()
-					// 		this.subscribeToPushNotifications()
-					// 	}
-					// })
-				}
-				this.subscribeToPushNotificationsCheckbox = false
-				this.showSubscribeToPushNotificationsCheckbox = false
-				document.getElementById('overlay').style.display = 'none'
 			},
 			removeOverlay() {
 				document.getElementById('overlay').style.display = 'none'
@@ -294,46 +275,55 @@
 					throw error
 				}
 			},
-			async subscribeToPushNotifications() {
+			async toggleSubscribeToPushNotifications() {
 				try {
 					// Steps details: https://developers.google.com/web/fundamentals/push-notifications/subscribing-a-user
-
-					// 1) Register Service Worker
-					const registration = await navigator.serviceWorker.register('/sw.js')
-
-					// 2) Subscribe a user with PushManager
-					const subscribeOptions = {
-						userVisibleOnly: true,
-						applicationServerKey: this.urlBase64ToUint8Array('BIdvJRwfx8ZszCttOq2AAdlVNd_SviDOI3aYaJgSOkATP4RHu3QfKYyeJVuOFWdlGDnwRYRYZSFZNU2SENyMVRk')
+					if (Notification.permission === 'denied') {
+						alert('abc')
+						return
 					}
-					const pushSubscription = await registration.pushManager.subscribe(subscribeOptions)
-					console.log('Received PushSubscription: ', JSON.stringify(pushSubscription))
+					document.getElementById('overlay').style.display = 'block'
+					const permissionResult = await this.askPermissionToPushNotifications()
+					console.log('permissionResult: ', permissionResult)
+					document.getElementById('overlay').style.display = 'none'
+					if (permissionResult !== 'granted') {
+						this.subscribeToPushNotifications = false
+					} else {
+						// 1) Register Service Worker
+						const registration = await navigator.serviceWorker.register('/sw.js')
 
-					// 3) Add subscriptions to database
-					await this.$store.dispatch('subscriptions/createUserSubscriptions', {
-						pushSubscription: JSON.stringify(pushSubscription),
-						userTeams: this.loadedUserTeams
-					})
+						// 2) Subscribe a user with PushManager
+						const subscribeOptions = {
+							userVisibleOnly: true,
+							applicationServerKey: this.urlBase64ToUint8Array('BIdvJRwfx8ZszCttOq2AAdlVNd_SviDOI3aYaJgSOkATP4RHu3QfKYyeJVuOFWdlGDnwRYRYZSFZNU2SENyMVRk')
+						}
 
-					// TODO: replace dispatch by commit on the store
-					this.$store.dispatch('subscriptions/fetchUserSubscriptions', pushSubscription.endpoint)
+						const pushSubscription = await registration.pushManager.subscribe(subscribeOptions)
+						console.log('Received PushSubscription: ', JSON.stringify(pushSubscription))
 
-					// // 3) Send subscription to the server
-					// const response = await axios.post('/push-notifications/create-subscription', {
-					// 	pushSubscription,
-					// 	userTeams: this.loadedUserTeams,
-					// 	userId: this.loadedUser.id
-					// })
-					// console.log('response: ', response)
-					// response.data.forEach(team => {
-					// 	new Noty({
-					// 		type: 'success',
-					// 		text: `You have successfully enable notifications for ${team.name} &#9786;`,
-					// 		timeout: 5000,
-					// 		theme: 'metroui'
-					// 	}).show()
-					// })
-					// return pushSubscription
+						// 3) Add subscriptions to database
+						const subscriptions2 = await this.$store.dispatch('subscriptions/createUserSubscriptions', {
+							pushSubscription: JSON.stringify(pushSubscription),
+							userTeams: this.loadedUserTeams,
+							deviceIdentifier: {
+								screenWidth: window.screen.width,
+								screenHeight: window.screen.height,
+								userAgent: slugify(window.navigator.userAgent)
+							}
+						})
+						console.log('subscriptions2: ', subscriptions2)
+						// subscriptions.forEach(subscription => {
+						// 	new Noty({
+						// 		type: 'success',
+						// 		text: `Subscribed to ${subscription.team.name}`,
+						// 		timeout: 5000,
+						// 		theme: 'metroui'
+						// 	}).show()
+						// })
+
+						// TODO: replace dispatch by commit on the store
+						// this.$store.dispatch('subscriptions/fetchUserSubscriptions', pushSubscription.endpoint)
+					}
 				} catch (error) {
 					throw error
 				}

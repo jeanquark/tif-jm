@@ -103,12 +103,12 @@ module.exports = {
         ],
         'nuxt-client-init-module',
         'fullpage-nuxt',
-        '@nuxtjs/sentry'
+        // '@nuxtjs/sentry'
     ],
-    sentry: {
-        dsn: process.env.NODE_ENV !== 'production' ? '' : process.env.SENTRY_DSN,
-        config: {} // Additional config
-    },
+    // sentry: {
+    //     dsn: process.env.NODE_ENV !== 'production' ? '' : process.env.SENTRY_DSN,
+    //     config: {} // Additional config
+    // },
     plugins: [
         { src: '~/plugins/vuetify.js', ssr: true },
         { src: '~/plugins/firebase-client-init.js', ssr: false },
