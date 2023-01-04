@@ -31,7 +31,7 @@
         "merge-images": "^1.1.0",
         "moment": "^2.24.0",
         "noty": "^3.2.0-beta",
-        "nuxt": "^2.8.1",
+        "nuxt": "^2.15.8",
         "nuxt-client-init-module": "^0.1.4",
         "nuxt-fontawesome": "^0.3.0",
         "nuxt-i18n": "^5.12.7",
